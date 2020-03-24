@@ -1,7 +1,7 @@
 # covid-parser
 
 To test:
-Add sample notes under `/resources/sample` as `.txt` files. For example:
+Add sample notes under `/resources/examples` as `.txt` files. For example:
 
 > 1.txt: "Patient is recovering from a **coronavirus** URI (NOT **COVID-19**) and..."
 
