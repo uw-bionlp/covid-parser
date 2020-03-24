@@ -1,0 +1,7 @@
+.settings/
+.vscode/
+target/
+assertionclassifier-1.0.jar
+assertion-classifier/
+*.txt
+.project
