@@ -12,7 +12,7 @@ public class App
         NoteProcessor processor = new NoteProcessor();
         List<CovidResult> results = new ArrayList<CovidResult>();
 
-        for (final File file : new File("resources/sample").listFiles()) {
+        for (final File file : new File("resources/examples").listFiles()) {
             try {
                 if (!file.getPath().endsWith("txt")) {
                     continue;
