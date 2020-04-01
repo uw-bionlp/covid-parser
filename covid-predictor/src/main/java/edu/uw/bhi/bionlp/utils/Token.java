@@ -1,4 +1,4 @@
-package edu.uw.bhi.bionlp;
+package edu.uw.bhi.bionlp.utils;
 
 public class Token {
     String text;

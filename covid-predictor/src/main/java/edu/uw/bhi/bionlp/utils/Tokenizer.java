@@ -1,4 +1,4 @@
-package edu.uw.bhi.bionlp;
+package edu.uw.bhi.bionlp.utils;
 
 import java.util.ArrayList;
 import java.util.List;

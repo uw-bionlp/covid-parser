@@ -1,18 +1,47 @@
-package edu.uw.rit;
+package edu.uw.bhi.bionlp.predictor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.uw.bhi.bionlp.Token;
-import edu.uw.bhi.bionlp.Tokenizer;
+import edu.uw.bhi.bionlp.utils.*;
 
 public class CovidResult {
     public List<CovidSentence> sentences = new ArrayList<CovidSentence>();
     public String text;
+    public String prediction;
 
     public CovidResult(String text) {
         this.text = text;
+    }
+
+	public boolean hasMatches() { 
+        for (CovidSentence sentence : sentences) {
+            if (sentence.hasMatches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void resolvePrediction() {
+        HashMap<String,Double> scores = new HashMap<String,Double>();
+        for (CovidSentence sentence : sentences) {
+            for (CovidConcept con : sentence.concepts) {
+                if (scores.containsKey(con.prediction)) {
+                    scores.put(con.prediction, scores.get(con.prediction) + con.covidPhrase.getWeight());
+                } else {
+                    scores.put(con.prediction, con.covidPhrase.getWeight());
+                }
+            }
+        }
+        Double max = 0.0;
+        for (String k : scores.keySet()) {
+            if (scores.get(k) > max) {
+                max = scores.get(k);
+                this.prediction = k;
+            }
+        }
     }
 }
 

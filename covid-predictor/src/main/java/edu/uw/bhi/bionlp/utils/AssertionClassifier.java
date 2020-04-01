@@ -1,4 +1,4 @@
-package edu.uw.bhi.bionlp;
+package edu.uw.bhi.bionlp.utils;
 
 import edu.uw.bhi.uwassert.AssertionClassification;
 import java.io.IOException;
