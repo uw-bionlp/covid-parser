@@ -1,0 +1,3 @@
+/home/nic/work/covid-parser/assertion-classifier/target/generated-sources/protobuf/java/edu/uw/bhi/bionlp/covid/parser/assertionclassifier/AssertionClassifierOuterClass.java
+/home/nic/work/covid-parser/assertion-classifier/target/generated-sources/protobuf/grpc-java/edu/uw/bhi/bionlp/covid/parser/assertionclassifier/AssertionClassifierGrpc.java
+/home/nic/work/covid-parser/assertion-classifier/src/main/java/edu/uw/bhi/bionlp/covid/parser/App.java
