@@ -4,60 +4,35 @@ package metamap;
 option java_package = "edu.uw.bhi.bionlp.covid.parser.metamap";
 
 service MetaMap {
-    rpc FindNamedEntities (SentenceDetectionInput) returns (SentenceDetectionOutput) {}
+    rpc ExtractNamedEntities (MetaMapInput) returns (MetaMapOutput) {}
 }
 
-/*
-class PipelineResult {
-    List<PipelineSentence> sentences = new ArrayList<PipelineSentence>();
-
-    public List<PipelineSentence> getSentences() {
-        return sentences;
-    }
+message MetaMapInput {
+    string id = 1;
+    string text = 2;
 }
 
-class PipelineSentence {
-    int index;
-    String text;
-    List<PipelineConcept> concepts = new ArrayList<PipelineConcept>();
-
-    public PipelineSentence(int index, String text) {
-        this.index = index;
-        this.text = text;
-    }
-
-    public int getIndex() { 
-        return index;
-    }
-
-    public String getText() { 
-        return text;
-    }
-
-    public List<PipelineConcept> getConcepts() {
-        return concepts;
-    }
+message MetaMapConcept {
+    string cui = 1;
+    string concept_name = 2;
+    string source_phrase = 3;
+    string semantic_label = 4;
+    int32 begin_char_index = 5;
+    int32 end_char_index = 6;
+    string prediction = 7;
 }
 
-class PipelineConcept extends UMLSConcept {
-    String prediction;
-
-    public PipelineConcept(UMLSConcept concept, String prediction) {
-        this.setCUI(concept.getCUI());
-        this.setConceptName(concept.getConceptName());
-        this.setPhrase(concept.getPhrase());
-        this.setSemanticTypeLabels(concept.getSemanticTypeLabels());
-        this.setBeginTokenIndex(concept.getBeginTokenIndex());
-        this.setEndTokenIndex(concept.getEndTokenIndex());
-        this.setPrediction(prediction);
-    }
-
-    public String getPrediction() {
-        return prediction;
-    }
-
-    public void setPrediction(String prediction) {
-        this.prediction = prediction;
-    }
+message MetaMapSentence {
+    int32 id = 1;
+    string text = 2;
+    int32 begin_char_index = 3;
+    int32 end_char_index = 4;
+    repeated MetaMapConcept concepts = 5;
 }
-*/
+
+message MetaMapOutput {
+    string id = 1;
+    string text = 2;
+    repeated MetaMapSentence sentences = 3;
+}
+
