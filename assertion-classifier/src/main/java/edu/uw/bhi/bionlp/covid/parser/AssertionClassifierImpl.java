@@ -71,7 +71,6 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
             .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-
     }
 
     String predict (String sentence, int startIndex, int endIndex) {
