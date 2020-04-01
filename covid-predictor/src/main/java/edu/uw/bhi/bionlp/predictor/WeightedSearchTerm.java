@@ -1,4 +1,4 @@
-package edu.uw.rit;
+package edu.uw.bhi.bionlp.predictor;
 
 public class WeightedSearchTerm {
     String text;

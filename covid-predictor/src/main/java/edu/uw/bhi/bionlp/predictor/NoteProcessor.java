@@ -1,8 +1,10 @@
-package edu.uw.rit;
-
-import edu.uw.bhi.bionlp.*;
+package edu.uw.bhi.bionlp.predictor;
 
 import java.util.List;
+
+import edu.uw.bhi.bionlp.utils.*;
+import opennlp.tools.util.Span;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -24,6 +26,7 @@ public class NoteProcessor {
 
         CovidResult result = new CovidResult(note);
         List<String> sentences = sentenceChunker.getSentences(note);
+        List<Span> x = sentenceChunker.detectBoundaries(note);
 
         for (int sId = 0; sId < sentences.size(); sId++) {
             CovidSentence sentence = new CovidSentence(sId, sentences.get(sId));

@@ -1,0 +1,19 @@
+syntax = "proto3";
+package covidworker;
+
+option java_package = "edu.uw.bhi.bionlp.covidworker";
+
+service CovidWorker {
+    rpc RunMetaMap (Payload) returns (Result) {}
+    rpc RunCovidPredictor (Payload) returns (Result) {}
+}
+
+message Payload {
+    int32 id = 1;
+    string value = 2;
+}
+
+message Result {
+    int32 id = 1;
+    string value = 2;
+}
