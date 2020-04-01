@@ -6,7 +6,6 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-      // Create a new server to listen on port 8080
       Server server = ServerBuilder.forPort(8080)
         .addService(new AssertionClassifierImpl())
         .build();
