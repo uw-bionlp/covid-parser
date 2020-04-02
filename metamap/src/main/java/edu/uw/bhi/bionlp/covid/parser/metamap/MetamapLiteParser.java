@@ -8,16 +8,11 @@ import gov.nih.nlm.nls.metamap.lite.types.Entity;
 import gov.nih.nlm.nls.metamap.lite.types.Ev;
 import gov.nih.nlm.nls.ner.MetaMapLite;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -28,9 +23,6 @@ public class MetamapLiteParser implements IMetamapParser {
 
     Properties myProperties;
     MetaMapLite metaMapLiteInst;
-
-    static String[] semanticTypes = {"acab", "anab", "comd", "cgab", "dsyn", "emod", "fndg", "inpo", "mobd", "neop", "patf", "sosy"};
-    static Set<String> semanticTypesToBeIncluded = new HashSet<String>(Arrays.asList(semanticTypes));
 
     public MetamapLiteParser() {
         try {
@@ -60,53 +52,20 @@ public class MetamapLiteParser implements IMetamapParser {
         document.setID("1");
 
         List<UMLSConcept> concepts = new ArrayList<UMLSConcept>();
-        String pretokenized = sentenceText.trim().replaceAll("\\s+", " ");
-        String[] sentenceTokens = pretokenized.split("\\s+");
-        
-        int beginTokenIndex = -1;
-        int endTokenIndex = 0;
-        int nextTokenIndex = 0;
         List<Entity> resultList = metaMapLiteInst.processDocument(document);
 
         for (Entity entity : resultList) {
-            String phraseText = entity.getMatchedText();
-            String[] phraseTokens = phraseText.split("\\s+");
-            beginTokenIndex = -1;
-
-            // Find the begin token index of the phrase
-            for (int k = nextTokenIndex; k < sentenceTokens.length; k++) {
-                boolean match = true;
-                for (int j = 0; match && j<phraseTokens.length && j+k<sentenceTokens.length; j++) {
-                    String sentenceToken = StringUtils.strip(sentenceTokens[j+k]," [!\"#$%&'()*+,-./:;<=>?\\\\@\\[\\]^_`{|}~0-9]");
-                    match = sentenceToken.equalsIgnoreCase(phraseTokens[j]);
-                }
-                if (match) {
-                    beginTokenIndex = k; 
-                    endTokenIndex = beginTokenIndex + phraseTokens.length - 1;
-                    nextTokenIndex = beginTokenIndex;
-                    break;
-                }
-            }
+            String matchedText = entity.getMatchedText();
+            int charStartIdx = entity.getStart();
+            int charStopIdx = charStartIdx + entity.getLength();
             List<String> cuiList = new ArrayList<String>();
 
             for (Ev ev : entity.getEvSet()) {
 
-                // filter based on semantic types
-                boolean flag = true;
                 ConceptInfo conceptInfo = ev.getConceptInfo();
-                List<String> SemanticTypeList = new ArrayList<String>(conceptInfo.getSemanticTypeSet());
-                for (String semType : SemanticTypeList) {
-                    flag = semanticTypesToBeIncluded.contains(semType); 
-                    if (flag) {
-                        break;
-                    }
-                }
-
-                if (flag == false) {
-                    continue;
-                }
-
+                String cui = conceptInfo.getCUI();
                 String semanticTypes = "";
+                List<String> SemanticTypeList = new ArrayList<String>(conceptInfo.getSemanticTypeSet());
                 if (conceptInfo.getSemanticTypeSet().size() == 1) {
                     semanticTypes = SemanticTypeList.get(0);
                 } else {
@@ -115,17 +74,17 @@ public class MetamapLiteParser implements IMetamapParser {
                     }
                 }
 
-                if (!cuiList.contains(conceptInfo.getCUI()) && flag == true) {
+                if (!cuiList.contains(cui)) {
                     UMLSConcept concept = new UMLSConcept();
-                    concept.setCUI(conceptInfo.getCUI());
+                    concept.setCUI(cui);
                     concept.setConceptName(conceptInfo.getPreferredName());
-                    concept.setPhrase(phraseText);
-                    concept.setBeginTokenIndex(beginTokenIndex);
-                    concept.setEndTokenIndex(endTokenIndex);
+                    concept.setPhrase(matchedText);
+                    concept.setBeginCharIndex(charStartIdx);
+                    concept.setEndCharIndex(charStopIdx);
                     concept.setSemanticTypeLabels(semanticTypes);
                     concepts.add(concept);
                 }
-                cuiList.add(conceptInfo.getCUI());
+                cuiList.add(cui);
             }
         }
         return concepts;

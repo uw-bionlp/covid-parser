@@ -13,6 +13,8 @@ public class UMLSConcept {
     private String semanticTypeLabels;
     private int beginTokenIndex;
     private int endTokenIndex;
+    private int beginCharIndex;
+    private int endCharIndex;
 
     public String toString() {
         String str = "";
@@ -60,11 +62,71 @@ public class UMLSConcept {
         this.endTokenIndex = endTokenIndex;
     }
 
+    public int getBeginCharIndex() {
+        return beginCharIndex;
+    }
+
+    public void setBeginCharIndex(int beginCharIndex) {
+        this.beginCharIndex = beginCharIndex;
+    }
+
+    public int getEndCharIndex() {
+        return endCharIndex;
+    }
+
+    public void setEndCharIndex(int endCharIndex) {
+        this.endCharIndex = endCharIndex;
+    }
+
     public String getSemanticTypeLabels() {
         return semanticTypeLabels;
     }
 
     public void setSemanticTypeLabels(String semanticTypeLabels) {
         this.semanticTypeLabels = semanticTypeLabels;
+    }
+
+    public String getNgram(String sentence, int ngramSize) {
+        int lastChar = sentence.length()-1;
+        int precCnt = 0;
+        int follCnt = 0;
+        int startPos = this.beginCharIndex;
+        int endPos = this.endCharIndex;
+        boolean isSpace = false;
+        boolean prevWasSpace = true;
+
+        // Get preceding
+        while (true) {
+            isSpace = sentence.charAt(startPos) == ' ';
+            if (isSpace && !prevWasSpace) {
+                precCnt++;
+            }
+            if (startPos == 0 || precCnt > ngramSize) {
+                if (precCnt > ngramSize) {
+                    precCnt = ngramSize;
+                }
+                break;
+            }
+            startPos--;
+            prevWasSpace = isSpace;
+        }
+
+        this.setBeginTokenIndex(precCnt);
+        this.setEndTokenIndex(this.beginTokenIndex + this.phrase.split(" ").length - 1);
+
+        // Get following
+        prevWasSpace = true;
+        while (true) {
+            isSpace = sentence.charAt(endPos) == ' ';
+            if (isSpace && !prevWasSpace) {
+                follCnt++;
+            }
+            if (endPos == lastChar || follCnt == ngramSize) {
+                break;
+            }
+            endPos++;
+            prevWasSpace = isSpace;
+        }
+        return sentence.substring(startPos, endPos).trim();
     }
 }

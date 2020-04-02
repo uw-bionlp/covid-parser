@@ -17,9 +17,11 @@ message MetaMapConcept {
     string concept_name = 2;
     string source_phrase = 3;
     string semantic_label = 4;
-    int32 begin_char_index = 5;
-    int32 end_char_index = 6;
-    string prediction = 7;
+    int32 begin_sent_char_index = 5;
+    int32 end_sent_char_index = 6;
+    int32 begin_doc_char_index = 7;
+    int32 end_doc_char_index = 8;
+    string prediction = 9;
 }
 
 message MetaMapSentence {

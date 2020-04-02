@@ -718,21 +718,31 @@ public final class MetaMapOuterClass {
         getSemanticLabelBytes();
 
     /**
-     * <code>int32 begin_char_index = 5;</code>
+     * <code>int32 begin_sent_char_index = 5;</code>
      */
-    int getBeginCharIndex();
+    int getBeginSentCharIndex();
 
     /**
-     * <code>int32 end_char_index = 6;</code>
+     * <code>int32 end_sent_char_index = 6;</code>
      */
-    int getEndCharIndex();
+    int getEndSentCharIndex();
 
     /**
-     * <code>string prediction = 7;</code>
+     * <code>int32 begin_doc_char_index = 7;</code>
+     */
+    int getBeginDocCharIndex();
+
+    /**
+     * <code>int32 end_doc_char_index = 8;</code>
+     */
+    int getEndDocCharIndex();
+
+    /**
+     * <code>string prediction = 9;</code>
      */
     java.lang.String getPrediction();
     /**
-     * <code>string prediction = 7;</code>
+     * <code>string prediction = 9;</code>
      */
     com.google.protobuf.ByteString
         getPredictionBytes();
@@ -754,8 +764,10 @@ public final class MetaMapOuterClass {
       conceptName_ = "";
       sourcePhrase_ = "";
       semanticLabel_ = "";
-      beginCharIndex_ = 0;
-      endCharIndex_ = 0;
+      beginSentCharIndex_ = 0;
+      endSentCharIndex_ = 0;
+      beginDocCharIndex_ = 0;
+      endDocCharIndex_ = 0;
       prediction_ = "";
     }
 
@@ -813,15 +825,25 @@ public final class MetaMapOuterClass {
             }
             case 40: {
 
-              beginCharIndex_ = input.readInt32();
+              beginSentCharIndex_ = input.readInt32();
               break;
             }
             case 48: {
 
-              endCharIndex_ = input.readInt32();
+              endSentCharIndex_ = input.readInt32();
               break;
             }
-            case 58: {
+            case 56: {
+
+              beginDocCharIndex_ = input.readInt32();
+              break;
+            }
+            case 64: {
+
+              endDocCharIndex_ = input.readInt32();
+              break;
+            }
+            case 74: {
               java.lang.String s = input.readStringRequireUtf8();
 
               prediction_ = s;
@@ -987,28 +1009,46 @@ public final class MetaMapOuterClass {
       }
     }
 
-    public static final int BEGIN_CHAR_INDEX_FIELD_NUMBER = 5;
-    private int beginCharIndex_;
+    public static final int BEGIN_SENT_CHAR_INDEX_FIELD_NUMBER = 5;
+    private int beginSentCharIndex_;
     /**
-     * <code>int32 begin_char_index = 5;</code>
+     * <code>int32 begin_sent_char_index = 5;</code>
      */
-    public int getBeginCharIndex() {
-      return beginCharIndex_;
+    public int getBeginSentCharIndex() {
+      return beginSentCharIndex_;
     }
 
-    public static final int END_CHAR_INDEX_FIELD_NUMBER = 6;
-    private int endCharIndex_;
+    public static final int END_SENT_CHAR_INDEX_FIELD_NUMBER = 6;
+    private int endSentCharIndex_;
     /**
-     * <code>int32 end_char_index = 6;</code>
+     * <code>int32 end_sent_char_index = 6;</code>
      */
-    public int getEndCharIndex() {
-      return endCharIndex_;
+    public int getEndSentCharIndex() {
+      return endSentCharIndex_;
     }
 
-    public static final int PREDICTION_FIELD_NUMBER = 7;
+    public static final int BEGIN_DOC_CHAR_INDEX_FIELD_NUMBER = 7;
+    private int beginDocCharIndex_;
+    /**
+     * <code>int32 begin_doc_char_index = 7;</code>
+     */
+    public int getBeginDocCharIndex() {
+      return beginDocCharIndex_;
+    }
+
+    public static final int END_DOC_CHAR_INDEX_FIELD_NUMBER = 8;
+    private int endDocCharIndex_;
+    /**
+     * <code>int32 end_doc_char_index = 8;</code>
+     */
+    public int getEndDocCharIndex() {
+      return endDocCharIndex_;
+    }
+
+    public static final int PREDICTION_FIELD_NUMBER = 9;
     private volatile java.lang.Object prediction_;
     /**
-     * <code>string prediction = 7;</code>
+     * <code>string prediction = 9;</code>
      */
     public java.lang.String getPrediction() {
       java.lang.Object ref = prediction_;
@@ -1023,7 +1063,7 @@ public final class MetaMapOuterClass {
       }
     }
     /**
-     * <code>string prediction = 7;</code>
+     * <code>string prediction = 9;</code>
      */
     public com.google.protobuf.ByteString
         getPredictionBytes() {
@@ -1063,14 +1103,20 @@ public final class MetaMapOuterClass {
       if (!getSemanticLabelBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, semanticLabel_);
       }
-      if (beginCharIndex_ != 0) {
-        output.writeInt32(5, beginCharIndex_);
+      if (beginSentCharIndex_ != 0) {
+        output.writeInt32(5, beginSentCharIndex_);
       }
-      if (endCharIndex_ != 0) {
-        output.writeInt32(6, endCharIndex_);
+      if (endSentCharIndex_ != 0) {
+        output.writeInt32(6, endSentCharIndex_);
+      }
+      if (beginDocCharIndex_ != 0) {
+        output.writeInt32(7, beginDocCharIndex_);
+      }
+      if (endDocCharIndex_ != 0) {
+        output.writeInt32(8, endDocCharIndex_);
       }
       if (!getPredictionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, prediction_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, prediction_);
       }
       unknownFields.writeTo(output);
     }
@@ -1092,16 +1138,24 @@ public final class MetaMapOuterClass {
       if (!getSemanticLabelBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, semanticLabel_);
       }
-      if (beginCharIndex_ != 0) {
+      if (beginSentCharIndex_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, beginCharIndex_);
+          .computeInt32Size(5, beginSentCharIndex_);
       }
-      if (endCharIndex_ != 0) {
+      if (endSentCharIndex_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(6, endCharIndex_);
+          .computeInt32Size(6, endSentCharIndex_);
+      }
+      if (beginDocCharIndex_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, beginDocCharIndex_);
+      }
+      if (endDocCharIndex_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, endDocCharIndex_);
       }
       if (!getPredictionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, prediction_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, prediction_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1127,10 +1181,14 @@ public final class MetaMapOuterClass {
           .equals(other.getSourcePhrase());
       result = result && getSemanticLabel()
           .equals(other.getSemanticLabel());
-      result = result && (getBeginCharIndex()
-          == other.getBeginCharIndex());
-      result = result && (getEndCharIndex()
-          == other.getEndCharIndex());
+      result = result && (getBeginSentCharIndex()
+          == other.getBeginSentCharIndex());
+      result = result && (getEndSentCharIndex()
+          == other.getEndSentCharIndex());
+      result = result && (getBeginDocCharIndex()
+          == other.getBeginDocCharIndex());
+      result = result && (getEndDocCharIndex()
+          == other.getEndDocCharIndex());
       result = result && getPrediction()
           .equals(other.getPrediction());
       result = result && unknownFields.equals(other.unknownFields);
@@ -1152,10 +1210,14 @@ public final class MetaMapOuterClass {
       hash = (53 * hash) + getSourcePhrase().hashCode();
       hash = (37 * hash) + SEMANTIC_LABEL_FIELD_NUMBER;
       hash = (53 * hash) + getSemanticLabel().hashCode();
-      hash = (37 * hash) + BEGIN_CHAR_INDEX_FIELD_NUMBER;
-      hash = (53 * hash) + getBeginCharIndex();
-      hash = (37 * hash) + END_CHAR_INDEX_FIELD_NUMBER;
-      hash = (53 * hash) + getEndCharIndex();
+      hash = (37 * hash) + BEGIN_SENT_CHAR_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getBeginSentCharIndex();
+      hash = (37 * hash) + END_SENT_CHAR_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getEndSentCharIndex();
+      hash = (37 * hash) + BEGIN_DOC_CHAR_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getBeginDocCharIndex();
+      hash = (37 * hash) + END_DOC_CHAR_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getEndDocCharIndex();
       hash = (37 * hash) + PREDICTION_FIELD_NUMBER;
       hash = (53 * hash) + getPrediction().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -1295,9 +1357,13 @@ public final class MetaMapOuterClass {
 
         semanticLabel_ = "";
 
-        beginCharIndex_ = 0;
+        beginSentCharIndex_ = 0;
 
-        endCharIndex_ = 0;
+        endSentCharIndex_ = 0;
+
+        beginDocCharIndex_ = 0;
+
+        endDocCharIndex_ = 0;
 
         prediction_ = "";
 
@@ -1327,8 +1393,10 @@ public final class MetaMapOuterClass {
         result.conceptName_ = conceptName_;
         result.sourcePhrase_ = sourcePhrase_;
         result.semanticLabel_ = semanticLabel_;
-        result.beginCharIndex_ = beginCharIndex_;
-        result.endCharIndex_ = endCharIndex_;
+        result.beginSentCharIndex_ = beginSentCharIndex_;
+        result.endSentCharIndex_ = endSentCharIndex_;
+        result.beginDocCharIndex_ = beginDocCharIndex_;
+        result.endDocCharIndex_ = endDocCharIndex_;
         result.prediction_ = prediction_;
         onBuilt();
         return result;
@@ -1387,11 +1455,17 @@ public final class MetaMapOuterClass {
           semanticLabel_ = other.semanticLabel_;
           onChanged();
         }
-        if (other.getBeginCharIndex() != 0) {
-          setBeginCharIndex(other.getBeginCharIndex());
+        if (other.getBeginSentCharIndex() != 0) {
+          setBeginSentCharIndex(other.getBeginSentCharIndex());
         }
-        if (other.getEndCharIndex() != 0) {
-          setEndCharIndex(other.getEndCharIndex());
+        if (other.getEndSentCharIndex() != 0) {
+          setEndSentCharIndex(other.getEndSentCharIndex());
+        }
+        if (other.getBeginDocCharIndex() != 0) {
+          setBeginDocCharIndex(other.getBeginDocCharIndex());
+        }
+        if (other.getEndDocCharIndex() != 0) {
+          setEndDocCharIndex(other.getEndDocCharIndex());
         }
         if (!other.getPrediction().isEmpty()) {
           prediction_ = other.prediction_;
@@ -1700,61 +1774,113 @@ public final class MetaMapOuterClass {
         return this;
       }
 
-      private int beginCharIndex_ ;
+      private int beginSentCharIndex_ ;
       /**
-       * <code>int32 begin_char_index = 5;</code>
+       * <code>int32 begin_sent_char_index = 5;</code>
        */
-      public int getBeginCharIndex() {
-        return beginCharIndex_;
+      public int getBeginSentCharIndex() {
+        return beginSentCharIndex_;
       }
       /**
-       * <code>int32 begin_char_index = 5;</code>
+       * <code>int32 begin_sent_char_index = 5;</code>
        */
-      public Builder setBeginCharIndex(int value) {
+      public Builder setBeginSentCharIndex(int value) {
         
-        beginCharIndex_ = value;
+        beginSentCharIndex_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 begin_char_index = 5;</code>
+       * <code>int32 begin_sent_char_index = 5;</code>
        */
-      public Builder clearBeginCharIndex() {
+      public Builder clearBeginSentCharIndex() {
         
-        beginCharIndex_ = 0;
+        beginSentCharIndex_ = 0;
         onChanged();
         return this;
       }
 
-      private int endCharIndex_ ;
+      private int endSentCharIndex_ ;
       /**
-       * <code>int32 end_char_index = 6;</code>
+       * <code>int32 end_sent_char_index = 6;</code>
        */
-      public int getEndCharIndex() {
-        return endCharIndex_;
+      public int getEndSentCharIndex() {
+        return endSentCharIndex_;
       }
       /**
-       * <code>int32 end_char_index = 6;</code>
+       * <code>int32 end_sent_char_index = 6;</code>
        */
-      public Builder setEndCharIndex(int value) {
+      public Builder setEndSentCharIndex(int value) {
         
-        endCharIndex_ = value;
+        endSentCharIndex_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 end_char_index = 6;</code>
+       * <code>int32 end_sent_char_index = 6;</code>
        */
-      public Builder clearEndCharIndex() {
+      public Builder clearEndSentCharIndex() {
         
-        endCharIndex_ = 0;
+        endSentCharIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int beginDocCharIndex_ ;
+      /**
+       * <code>int32 begin_doc_char_index = 7;</code>
+       */
+      public int getBeginDocCharIndex() {
+        return beginDocCharIndex_;
+      }
+      /**
+       * <code>int32 begin_doc_char_index = 7;</code>
+       */
+      public Builder setBeginDocCharIndex(int value) {
+        
+        beginDocCharIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 begin_doc_char_index = 7;</code>
+       */
+      public Builder clearBeginDocCharIndex() {
+        
+        beginDocCharIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int endDocCharIndex_ ;
+      /**
+       * <code>int32 end_doc_char_index = 8;</code>
+       */
+      public int getEndDocCharIndex() {
+        return endDocCharIndex_;
+      }
+      /**
+       * <code>int32 end_doc_char_index = 8;</code>
+       */
+      public Builder setEndDocCharIndex(int value) {
+        
+        endDocCharIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 end_doc_char_index = 8;</code>
+       */
+      public Builder clearEndDocCharIndex() {
+        
+        endDocCharIndex_ = 0;
         onChanged();
         return this;
       }
 
       private java.lang.Object prediction_ = "";
       /**
-       * <code>string prediction = 7;</code>
+       * <code>string prediction = 9;</code>
        */
       public java.lang.String getPrediction() {
         java.lang.Object ref = prediction_;
@@ -1769,7 +1895,7 @@ public final class MetaMapOuterClass {
         }
       }
       /**
-       * <code>string prediction = 7;</code>
+       * <code>string prediction = 9;</code>
        */
       public com.google.protobuf.ByteString
           getPredictionBytes() {
@@ -1785,7 +1911,7 @@ public final class MetaMapOuterClass {
         }
       }
       /**
-       * <code>string prediction = 7;</code>
+       * <code>string prediction = 9;</code>
        */
       public Builder setPrediction(
           java.lang.String value) {
@@ -1798,7 +1924,7 @@ public final class MetaMapOuterClass {
         return this;
       }
       /**
-       * <code>string prediction = 7;</code>
+       * <code>string prediction = 9;</code>
        */
       public Builder clearPrediction() {
         
@@ -1807,7 +1933,7 @@ public final class MetaMapOuterClass {
         return this;
       }
       /**
-       * <code>string prediction = 7;</code>
+       * <code>string prediction = 9;</code>
        */
       public Builder setPredictionBytes(
           com.google.protobuf.ByteString value) {
@@ -1879,24 +2005,24 @@ public final class MetaMapOuterClass {
     int getId();
 
     /**
-     * <code>string text = 2;</code>
-     */
-    java.lang.String getText();
-    /**
-     * <code>string text = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getTextBytes();
-
-    /**
-     * <code>int32 begin_char_index = 3;</code>
+     * <code>int32 begin_char_index = 2;</code>
      */
     int getBeginCharIndex();
 
     /**
-     * <code>int32 end_char_index = 4;</code>
+     * <code>int32 end_char_index = 3;</code>
      */
     int getEndCharIndex();
+
+    /**
+     * <code>string text = 4;</code>
+     */
+    java.lang.String getText();
+    /**
+     * <code>string text = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getTextBytes();
 
     /**
      * <code>repeated .metamap.MetaMapConcept concepts = 5;</code>
@@ -1936,9 +2062,9 @@ public final class MetaMapOuterClass {
     }
     private MetaMapSentence() {
       id_ = 0;
-      text_ = "";
       beginCharIndex_ = 0;
       endCharIndex_ = 0;
+      text_ = "";
       concepts_ = java.util.Collections.emptyList();
     }
 
@@ -1975,20 +2101,20 @@ public final class MetaMapOuterClass {
               id_ = input.readInt32();
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              text_ = s;
-              break;
-            }
-            case 24: {
+            case 16: {
 
               beginCharIndex_ = input.readInt32();
               break;
             }
-            case 32: {
+            case 24: {
 
               endCharIndex_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              text_ = s;
               break;
             }
             case 42: {
@@ -2037,10 +2163,28 @@ public final class MetaMapOuterClass {
       return id_;
     }
 
-    public static final int TEXT_FIELD_NUMBER = 2;
+    public static final int BEGIN_CHAR_INDEX_FIELD_NUMBER = 2;
+    private int beginCharIndex_;
+    /**
+     * <code>int32 begin_char_index = 2;</code>
+     */
+    public int getBeginCharIndex() {
+      return beginCharIndex_;
+    }
+
+    public static final int END_CHAR_INDEX_FIELD_NUMBER = 3;
+    private int endCharIndex_;
+    /**
+     * <code>int32 end_char_index = 3;</code>
+     */
+    public int getEndCharIndex() {
+      return endCharIndex_;
+    }
+
+    public static final int TEXT_FIELD_NUMBER = 4;
     private volatile java.lang.Object text_;
     /**
-     * <code>string text = 2;</code>
+     * <code>string text = 4;</code>
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -2055,7 +2199,7 @@ public final class MetaMapOuterClass {
       }
     }
     /**
-     * <code>string text = 2;</code>
+     * <code>string text = 4;</code>
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -2069,24 +2213,6 @@ public final class MetaMapOuterClass {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
-    }
-
-    public static final int BEGIN_CHAR_INDEX_FIELD_NUMBER = 3;
-    private int beginCharIndex_;
-    /**
-     * <code>int32 begin_char_index = 3;</code>
-     */
-    public int getBeginCharIndex() {
-      return beginCharIndex_;
-    }
-
-    public static final int END_CHAR_INDEX_FIELD_NUMBER = 4;
-    private int endCharIndex_;
-    /**
-     * <code>int32 end_char_index = 4;</code>
-     */
-    public int getEndCharIndex() {
-      return endCharIndex_;
     }
 
     public static final int CONCEPTS_FIELD_NUMBER = 5;
@@ -2139,14 +2265,14 @@ public final class MetaMapOuterClass {
       if (id_ != 0) {
         output.writeInt32(1, id_);
       }
-      if (!getTextBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, text_);
-      }
       if (beginCharIndex_ != 0) {
-        output.writeInt32(3, beginCharIndex_);
+        output.writeInt32(2, beginCharIndex_);
       }
       if (endCharIndex_ != 0) {
-        output.writeInt32(4, endCharIndex_);
+        output.writeInt32(3, endCharIndex_);
+      }
+      if (!getTextBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, text_);
       }
       for (int i = 0; i < concepts_.size(); i++) {
         output.writeMessage(5, concepts_.get(i));
@@ -2163,16 +2289,16 @@ public final class MetaMapOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, id_);
       }
-      if (!getTextBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, text_);
-      }
       if (beginCharIndex_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, beginCharIndex_);
+          .computeInt32Size(2, beginCharIndex_);
       }
       if (endCharIndex_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, endCharIndex_);
+          .computeInt32Size(3, endCharIndex_);
+      }
+      if (!getTextBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, text_);
       }
       for (int i = 0; i < concepts_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -2196,12 +2322,12 @@ public final class MetaMapOuterClass {
       boolean result = true;
       result = result && (getId()
           == other.getId());
-      result = result && getText()
-          .equals(other.getText());
       result = result && (getBeginCharIndex()
           == other.getBeginCharIndex());
       result = result && (getEndCharIndex()
           == other.getEndCharIndex());
+      result = result && getText()
+          .equals(other.getText());
       result = result && getConceptsList()
           .equals(other.getConceptsList());
       result = result && unknownFields.equals(other.unknownFields);
@@ -2217,12 +2343,12 @@ public final class MetaMapOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + getId();
-      hash = (37 * hash) + TEXT_FIELD_NUMBER;
-      hash = (53 * hash) + getText().hashCode();
       hash = (37 * hash) + BEGIN_CHAR_INDEX_FIELD_NUMBER;
       hash = (53 * hash) + getBeginCharIndex();
       hash = (37 * hash) + END_CHAR_INDEX_FIELD_NUMBER;
       hash = (53 * hash) + getEndCharIndex();
+      hash = (37 * hash) + TEXT_FIELD_NUMBER;
+      hash = (53 * hash) + getText().hashCode();
       if (getConceptsCount() > 0) {
         hash = (37 * hash) + CONCEPTS_FIELD_NUMBER;
         hash = (53 * hash) + getConceptsList().hashCode();
@@ -2359,11 +2485,11 @@ public final class MetaMapOuterClass {
         super.clear();
         id_ = 0;
 
-        text_ = "";
-
         beginCharIndex_ = 0;
 
         endCharIndex_ = 0;
+
+        text_ = "";
 
         if (conceptsBuilder_ == null) {
           concepts_ = java.util.Collections.emptyList();
@@ -2396,9 +2522,9 @@ public final class MetaMapOuterClass {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         result.id_ = id_;
-        result.text_ = text_;
         result.beginCharIndex_ = beginCharIndex_;
         result.endCharIndex_ = endCharIndex_;
+        result.text_ = text_;
         if (conceptsBuilder_ == null) {
           if (((bitField0_ & 0x00000010) == 0x00000010)) {
             concepts_ = java.util.Collections.unmodifiableList(concepts_);
@@ -2453,15 +2579,15 @@ public final class MetaMapOuterClass {
         if (other.getId() != 0) {
           setId(other.getId());
         }
-        if (!other.getText().isEmpty()) {
-          text_ = other.text_;
-          onChanged();
-        }
         if (other.getBeginCharIndex() != 0) {
           setBeginCharIndex(other.getBeginCharIndex());
         }
         if (other.getEndCharIndex() != 0) {
           setEndCharIndex(other.getEndCharIndex());
+        }
+        if (!other.getText().isEmpty()) {
+          text_ = other.text_;
+          onChanged();
         }
         if (conceptsBuilder_ == null) {
           if (!other.concepts_.isEmpty()) {
@@ -2543,9 +2669,61 @@ public final class MetaMapOuterClass {
         return this;
       }
 
+      private int beginCharIndex_ ;
+      /**
+       * <code>int32 begin_char_index = 2;</code>
+       */
+      public int getBeginCharIndex() {
+        return beginCharIndex_;
+      }
+      /**
+       * <code>int32 begin_char_index = 2;</code>
+       */
+      public Builder setBeginCharIndex(int value) {
+        
+        beginCharIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 begin_char_index = 2;</code>
+       */
+      public Builder clearBeginCharIndex() {
+        
+        beginCharIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int endCharIndex_ ;
+      /**
+       * <code>int32 end_char_index = 3;</code>
+       */
+      public int getEndCharIndex() {
+        return endCharIndex_;
+      }
+      /**
+       * <code>int32 end_char_index = 3;</code>
+       */
+      public Builder setEndCharIndex(int value) {
+        
+        endCharIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 end_char_index = 3;</code>
+       */
+      public Builder clearEndCharIndex() {
+        
+        endCharIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object text_ = "";
       /**
-       * <code>string text = 2;</code>
+       * <code>string text = 4;</code>
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -2560,7 +2738,7 @@ public final class MetaMapOuterClass {
         }
       }
       /**
-       * <code>string text = 2;</code>
+       * <code>string text = 4;</code>
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -2576,7 +2754,7 @@ public final class MetaMapOuterClass {
         }
       }
       /**
-       * <code>string text = 2;</code>
+       * <code>string text = 4;</code>
        */
       public Builder setText(
           java.lang.String value) {
@@ -2589,7 +2767,7 @@ public final class MetaMapOuterClass {
         return this;
       }
       /**
-       * <code>string text = 2;</code>
+       * <code>string text = 4;</code>
        */
       public Builder clearText() {
         
@@ -2598,7 +2776,7 @@ public final class MetaMapOuterClass {
         return this;
       }
       /**
-       * <code>string text = 2;</code>
+       * <code>string text = 4;</code>
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {
@@ -2608,58 +2786,6 @@ public final class MetaMapOuterClass {
   checkByteStringIsUtf8(value);
         
         text_ = value;
-        onChanged();
-        return this;
-      }
-
-      private int beginCharIndex_ ;
-      /**
-       * <code>int32 begin_char_index = 3;</code>
-       */
-      public int getBeginCharIndex() {
-        return beginCharIndex_;
-      }
-      /**
-       * <code>int32 begin_char_index = 3;</code>
-       */
-      public Builder setBeginCharIndex(int value) {
-        
-        beginCharIndex_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 begin_char_index = 3;</code>
-       */
-      public Builder clearBeginCharIndex() {
-        
-        beginCharIndex_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int endCharIndex_ ;
-      /**
-       * <code>int32 end_char_index = 4;</code>
-       */
-      public int getEndCharIndex() {
-        return endCharIndex_;
-      }
-      /**
-       * <code>int32 end_char_index = 4;</code>
-       */
-      public Builder setEndCharIndex(int value) {
-        
-        endCharIndex_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 end_char_index = 4;</code>
-       */
-      public Builder clearEndCharIndex() {
-        
-        endCharIndex_ = 0;
         onChanged();
         return this;
       }
@@ -4013,20 +4139,22 @@ public final class MetaMapOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\rMetaMap.proto\022\007metamap\"(\n\014MetaMapInput" +
-      "\022\n\n\002id\030\001 \001(\t\022\014\n\004text\030\002 \001(\t\"\250\001\n\016MetaMapCo" +
+      "\022\n\n\002id\030\001 \001(\t\022\014\n\004text\030\002 \001(\t\"\354\001\n\016MetaMapCo" +
       "ncept\022\013\n\003cui\030\001 \001(\t\022\024\n\014concept_name\030\002 \001(\t" +
       "\022\025\n\rsource_phrase\030\003 \001(\t\022\026\n\016semantic_labe" +
-      "l\030\004 \001(\t\022\030\n\020begin_char_index\030\005 \001(\005\022\026\n\016end" +
-      "_char_index\030\006 \001(\005\022\022\n\nprediction\030\007 \001(\t\"\210\001" +
-      "\n\017MetaMapSentence\022\n\n\002id\030\001 \001(\005\022\014\n\004text\030\002 " +
-      "\001(\t\022\030\n\020begin_char_index\030\003 \001(\005\022\026\n\016end_cha" +
-      "r_index\030\004 \001(\005\022)\n\010concepts\030\005 \003(\0132\027.metama" +
-      "p.MetaMapConcept\"V\n\rMetaMapOutput\022\n\n\002id\030",
-      "\001 \001(\t\022\014\n\004text\030\002 \001(\t\022+\n\tsentences\030\003 \003(\0132\030" +
-      ".metamap.MetaMapSentence2R\n\007MetaMap\022G\n\024E" +
-      "xtractNamedEntities\022\025.metamap.MetaMapInp" +
-      "ut\032\026.metamap.MetaMapOutput\"\000B(\n&edu.uw.b" +
-      "hi.bionlp.covid.parser.metamapb\006proto3"
+      "l\030\004 \001(\t\022\035\n\025begin_sent_char_index\030\005 \001(\005\022\033" +
+      "\n\023end_sent_char_index\030\006 \001(\005\022\034\n\024begin_doc" +
+      "_char_index\030\007 \001(\005\022\032\n\022end_doc_char_index\030" +
+      "\010 \001(\005\022\022\n\nprediction\030\t \001(\t\"\210\001\n\017MetaMapSen" +
+      "tence\022\n\n\002id\030\001 \001(\005\022\030\n\020begin_char_index\030\002 " +
+      "\001(\005\022\026\n\016end_char_index\030\003 \001(\005\022\014\n\004text\030\004 \001(",
+      "\t\022)\n\010concepts\030\005 \003(\0132\027.metamap.MetaMapCon" +
+      "cept\"V\n\rMetaMapOutput\022\n\n\002id\030\001 \001(\t\022\014\n\004tex" +
+      "t\030\002 \001(\t\022+\n\tsentences\030\003 \003(\0132\030.metamap.Met" +
+      "aMapSentence2R\n\007MetaMap\022G\n\024ExtractNamedE" +
+      "ntities\022\025.metamap.MetaMapInput\032\026.metamap" +
+      ".MetaMapOutput\"\000B(\n&edu.uw.bhi.bionlp.co" +
+      "vid.parser.metamapb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4051,13 +4179,13 @@ public final class MetaMapOuterClass {
     internal_static_metamap_MetaMapConcept_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_metamap_MetaMapConcept_descriptor,
-        new java.lang.String[] { "Cui", "ConceptName", "SourcePhrase", "SemanticLabel", "BeginCharIndex", "EndCharIndex", "Prediction", });
+        new java.lang.String[] { "Cui", "ConceptName", "SourcePhrase", "SemanticLabel", "BeginSentCharIndex", "EndSentCharIndex", "BeginDocCharIndex", "EndDocCharIndex", "Prediction", });
     internal_static_metamap_MetaMapSentence_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_metamap_MetaMapSentence_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_metamap_MetaMapSentence_descriptor,
-        new java.lang.String[] { "Id", "Text", "BeginCharIndex", "EndCharIndex", "Concepts", });
+        new java.lang.String[] { "Id", "BeginCharIndex", "EndCharIndex", "Text", "Concepts", });
     internal_static_metamap_MetaMapOutput_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_metamap_MetaMapOutput_fieldAccessorTable = new
