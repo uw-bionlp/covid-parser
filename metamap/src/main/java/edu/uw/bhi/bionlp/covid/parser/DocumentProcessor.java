@@ -14,7 +14,6 @@ public class DocumentProcessor {
 
     MetamapLiteParser parser = new MetamapLiteParser();
     AssertionClassifierClient assertionClassifier = new AssertionClassifierClient();
-    MetaMapSentence.Builder sentenceBuilder = MetaMapSentence.newBuilder();
     MetaMapConcept.Builder conceptBuilder = MetaMapConcept.newBuilder();
     int ngramSize = 5;
 
@@ -35,11 +34,8 @@ public class DocumentProcessor {
          * For each sentence.
          */
         for (int sId = 0; sId < sentences.size(); sId++) {
+            List<MetaMapConcept> mmCons = new ArrayList<MetaMapConcept>();
             Sentence sentence = sentences.get(sId);
-            sentenceBuilder
-                .setBeginCharIndex(sentence.getBeginCharIndex())
-                .setEndCharIndex(sentence.getEndCharIndex())
-                .setText(sentence.getText());
 
             /* 
              * Extract UMLS concepts.
@@ -73,10 +69,17 @@ public class DocumentProcessor {
                         .setPrediction(prediction)
                         .setSemanticLabel(concept.getSemanticTypeLabels())
                         .build();
-                    sentenceBuilder.addConcepts(mmCon);
+                        mmCons.add(mmCon);
                 }
             }
-            mmSentences.add(sentenceBuilder.build());
+            MetaMapSentence mmSent = MetaMapSentence
+                .newBuilder()
+                .setBeginCharIndex(sentence.getBeginCharIndex())
+                .setEndCharIndex(sentence.getEndCharIndex())
+                .addAllConcepts(mmCons)
+                .setText(sentence.getText())
+                .build();
+            mmSentences.add(mmSent);
         }
         return mmSentences;
     }
