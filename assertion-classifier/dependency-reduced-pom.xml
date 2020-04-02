@@ -37,7 +37,7 @@
         <configuration>
           <transformers>
             <transformer>
-              <mainClass>edu.uw.bhi.bionlp.App</mainClass>
+              <mainClass>edu.uw.bhi.bionlp.covid.parser.App</mainClass>
             </transformer>
           </transformers>
         </configuration>
@@ -77,4 +77,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <properties>
+    <exec.mainClass>edu.uw.bhi.bionlp.covid.parser.App</exec.mainClass>
+  </properties>
 </project>
