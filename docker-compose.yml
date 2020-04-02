@@ -11,6 +11,15 @@ services:
             default:
                 aliases:
                     - assertion-classifier
+    metamap:
+        build:
+            context: metamap/
+        ports:
+            - "5000:5000"
+        networks:
+            default:
+                aliases:
+                    - metamap
         
 
 networks:

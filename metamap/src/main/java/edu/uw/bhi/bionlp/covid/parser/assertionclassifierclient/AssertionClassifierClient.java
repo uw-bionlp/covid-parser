@@ -15,7 +15,7 @@ public class AssertionClassifierClient {
 
     public AssertionClassifierClient() {
 
-        Channel channel = ManagedChannelBuilder.forAddress("0.0.0.0", 8080).usePlaintext(true).build();
+        Channel channel = ManagedChannelBuilder.forAddress("assertion-classifer", 8080).usePlaintext(true).build();
         blockingStub = AssertionClassifierGrpc.newBlockingStub(channel);
     }
 

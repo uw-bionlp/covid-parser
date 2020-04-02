@@ -77,6 +77,7 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
         try {
             return AssertionClassification.predictMP(sentence, new IntPair(startIndex, endIndex));  
         } catch (Exception ex) {
+            System.out.println("Error: failed to assert. Sentence: '" + sentence + "', StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". " + ex.getMessage());
             return "present";
         }
     }
