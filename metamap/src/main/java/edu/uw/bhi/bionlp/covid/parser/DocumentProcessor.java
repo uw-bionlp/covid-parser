@@ -9,6 +9,7 @@ import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapSentence;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DocumentProcessor {
 
@@ -19,6 +20,7 @@ public class DocumentProcessor {
 
     public List<MetaMapSentence> processDocument(String note) {
         List<MetaMapSentence> mmSentences = new ArrayList<MetaMapSentence>();
+        HashMap<String,String> assertionCache = new HashMap<String,String>();
         
         /* 
          * Chunk into sentences.
@@ -52,9 +54,15 @@ public class DocumentProcessor {
              */
 		    for (UMLSConcept concept : concepts) {
                 String ngram = concept.getNgram(sentence.getText(), ngramSize);
+                String inputs = concept.getPhrase() + "|" + concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
                 String prediction = "present";
                 try {
-                    prediction = assertionClassifier.predictAssertion(ngram, concept.getBeginTokenIndex(), concept.getEndTokenIndex());
+                    if (assertionCache.containsKey(inputs)) {
+                        prediction = assertionCache.get(inputs);
+                    } else {
+                        prediction = assertionClassifier.predictAssertion(ngram, concept.getBeginTokenIndex(), concept.getEndTokenIndex());
+                        assertionCache.put(inputs, prediction);
+                    }
                 } catch (Exception ex) {
                     System.out.println("Error: failed to predict concept. Concept: '" + concept.getConceptName() + "'. " + ex.getMessage());
                 } finally {
