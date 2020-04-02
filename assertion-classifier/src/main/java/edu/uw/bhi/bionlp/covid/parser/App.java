@@ -13,6 +13,9 @@ public class App
       // Start the server
       server.start();
 
+      // Server threads are running in the background.
+      System.out.println("Assertion Classifier is up!");
+
       // Don't exit the main thread. Wait until server is terminated.
       server.awaitTermination();
     }

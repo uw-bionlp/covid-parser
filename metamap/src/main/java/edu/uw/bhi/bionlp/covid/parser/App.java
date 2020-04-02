@@ -6,11 +6,15 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-      Server server = ServerBuilder.forPort(8080)
+      Server server = ServerBuilder.forPort(5000)
+        .addService(new MetaMapImpl())
         .build();
 
       // Start the server
       server.start();
+
+      // Server threads are running in the background.
+      System.out.println("MetaMap is up!");
 
       // Don't exit the main thread. Wait until server is terminated.
       server.awaitTermination();

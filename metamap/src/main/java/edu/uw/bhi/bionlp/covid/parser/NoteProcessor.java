@@ -1,5 +1,7 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
+import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.Sentence;
+import edu.uw.bhi.bionlp.covid.parser.assertionclassifierclient.AssertionClassifierClient;
 import edu.uw.bhi.bionlp.covid.parser.data.UMLSConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
 
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 public class NoteProcessor {
 
     MetamapLiteParser parser = new MetamapLiteParser();
+    AssertionClassifierClient assertionClassifier = new AssertionClassifierClient();
 
     public PipelineResult processNote(String note) {
 
@@ -18,9 +21,9 @@ public class NoteProcessor {
         /* 
          * Chunk into sentences.
          */
-        List<String> sentences = new ArrayList<String>();
+        List<Sentence> sentences = new ArrayList<Sentence>();
         try {
-            //sentences = sentenceChunker.getSentences(note);
+            sentences = assertionClassifier.detectSentences(note);
         } catch (Exception ex) {
             System.out.println("Error: failed to chunk sentences. " + ex.getMessage());
         }
@@ -29,16 +32,14 @@ public class NoteProcessor {
          * For each sentence.
          */
         for (int sID = 0; sID < sentences.size(); sID++) {
-            PipelineSentence sentence = new PipelineSentence(sID, sentences.get(sID));
-
             /* 
              * Extract UMLS concepts.
              */
             List<UMLSConcept> concepts = new ArrayList<UMLSConcept>();
             try {
-                concepts = parser.parseSentenceWithMetamap(sentence.text);
+                concepts = parser.parseSentenceWithMetamap(sentences.get(sID).getText());
             } catch (Exception ex) {
-                System.out.println("Error: failed to parse with Metamap. Sentence: '" + sentence.text + "'. " + ex.getMessage());
+                System.out.println("Error: failed to parse with Metamap. Sentence: '" + sentences.get(sID).getText() + "'. " + ex.getMessage());
             }
 
             /* 
@@ -50,15 +51,15 @@ public class NoteProcessor {
                     if (concept.getBeginTokenIndex() == 0 && concept.getEndTokenIndex() == 0) {
                         prediction = "present";
                     } else {
-                        //prediction = classifier.predict(sentence.text, concept.getBeginTokenIndex(), concept.getEndTokenIndex());
+                        prediction = assertionClassifier.predictAssertion(sentences.get(sID).getText(), concept.getBeginTokenIndex(), concept.getEndTokenIndex());
                     }
                 } catch (Exception ex) {
                     System.out.println("Error: failed to predict concept. Concept: '" + concept.getConceptName() + "'. " + ex.getMessage());
                 } finally {
-                    sentence.concepts.add(new PipelineConcept(concept, prediction));
+                    // sentence.concepts.add(new PipelineConcept(concept, prediction));
                 }
             }
-            result.sentences.add(sentence);
+            // result.sentences.add(sentence);
         }
         return result;
     }

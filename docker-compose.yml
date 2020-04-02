@@ -1,0 +1,18 @@
+# docker-compose up --scale worker=<x>
+
+version: '3'
+services:
+    assertion-classifier:
+        build:
+            context: assertion-classifier/
+        ports:
+            - "8080:8080"
+        networks:
+            default:
+                aliases:
+                    - assertion-classifier
+        
+
+networks:
+    default:
+        driver: bridge
