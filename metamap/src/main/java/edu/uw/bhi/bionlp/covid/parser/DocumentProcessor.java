@@ -85,6 +85,7 @@ public class DocumentProcessor {
                 .setBeginCharIndex(sentence.getBeginCharIndex())
                 .setEndCharIndex(sentence.getEndCharIndex())
                 .addAllConcepts(mmCons)
+                .setId(sId)
                 .setText(sentence.getText())
                 .build();
             mmSentences.add(mmSent);
