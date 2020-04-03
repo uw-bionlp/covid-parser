@@ -1,1 +1,9 @@
 target/
+venv/
+images/
+output/
+test.txt
+test/
+.vscode/
+__pycache__/
+*.pyc
