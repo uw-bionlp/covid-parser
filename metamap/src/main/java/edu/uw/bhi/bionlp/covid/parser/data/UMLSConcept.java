@@ -96,7 +96,7 @@ public class UMLSConcept {
         boolean prevWasSpace = true;
 
         // Get preceding
-        while (true) {
+        while (startPos > -1) {
             isSpace = sentence.charAt(startPos) == ' ';
             if (isSpace && !prevWasSpace) {
                 precCnt++;
@@ -116,7 +116,7 @@ public class UMLSConcept {
 
         // Get following
         prevWasSpace = true;
-        while (true) {
+        while (endPos <= lastChar) {
             isSpace = sentence.charAt(endPos) == ' ';
             if (isSpace && !prevWasSpace) {
                 follCnt++;
