@@ -53,10 +53,10 @@ public class DocumentProcessor {
              * For each concept, if indexes valid, predict assertion.
              */
 		    for (UMLSConcept concept : concepts) {
-                String ngram = concept.getNgram(sentence.getText(), ngramSize);
-                String inputs = concept.getPhrase() + "|" + concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
                 String prediction = "present";
                 try {
+                    String ngram = concept.getNgram(sentence.getText(), ngramSize);
+                    String inputs = concept.getPhrase() + "|" + concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
                     if (assertionCache.containsKey(inputs)) {
                         prediction = assertionCache.get(inputs);
                     } else {
