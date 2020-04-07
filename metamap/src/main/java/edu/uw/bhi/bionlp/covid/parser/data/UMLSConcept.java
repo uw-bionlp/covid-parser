@@ -18,7 +18,7 @@ public class UMLSConcept {
 
     public String toString() {
         String str = "";
-        str += "CUI:"+this.getCUI()+"\t"+"PHRASE:"+this.getPhrase()+"\tBeginTokenIndex:"+this.getBeginTokenIndex()+"\tEndTokenIndex:"+this.getEndTokenIndex()+"\tSTR:"+this.getConceptName()+"\tSEMTYPES:"+this.getSemanticTypeLabels();
+        str += this.getCUI()+"\t"+"PHRASE:"+this.getPhrase()+"\tSTR:"+this.getConceptName()+"\tSEMTYPES:"+this.getSemanticTypeLabels();
         return str;
     }
 
@@ -94,6 +94,7 @@ public class UMLSConcept {
         int endPos = this.endCharIndex;
         boolean isSpace = false;
         boolean prevWasSpace = true;
+        String sent = sentence.trim().replaceAll("\\s+", " ");
 
         // Get preceding
         while (startPos > -1) {

@@ -3,6 +3,7 @@ venv/
 images/
 output/
 test.txt
+notes.txt
 test/
 .vscode/
 __pycache__/
