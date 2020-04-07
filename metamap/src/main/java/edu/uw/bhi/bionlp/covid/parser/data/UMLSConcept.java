@@ -1,16 +1,17 @@
 package edu.uw.bhi.bionlp.covid.parser.data;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
- * Author: melihay
- * Date: Jun 28, 2012
- * Time: 11:31:09 AM
- * Version: 1.0
+ * Author: melihay Date: Jun 28, 2012 Time: 11:31:09 AM Version: 1.0
  */
 public class UMLSConcept {
     private String CUI;
     private String conceptName;
     private String phrase; // phrase the concept identified in
-    private String semanticTypeLabels;
+    private List<String> semanticTypeLabels;
     private int beginTokenIndex;
     private int endTokenIndex;
     private int beginCharIndex;
@@ -78,56 +79,16 @@ public class UMLSConcept {
         this.endCharIndex = endCharIndex;
     }
 
-    public String getSemanticTypeLabels() {
+    public List<String> getSemanticTypeLabels() {
         return semanticTypeLabels;
     }
 
-    public void setSemanticTypeLabels(String semanticTypeLabels) {
+    public void setSemanticTypeLabels(List<String> semanticTypeLabels) {
         this.semanticTypeLabels = semanticTypeLabels;
     }
 
-    public String getNgram(String sentence, int ngramSize) {
-        int lastChar = sentence.length()-1;
-        int precCnt = 0;
-        int follCnt = 0;
-        int startPos = this.beginCharIndex;
-        int endPos = this.endCharIndex;
-        boolean isSpace = false;
-        boolean prevWasSpace = true;
-        String sent = sentence.trim().replaceAll("\\s+", " ");
-
-        // Get preceding
-        while (startPos > -1) {
-            isSpace = sentence.charAt(startPos) == ' ';
-            if (isSpace && !prevWasSpace) {
-                precCnt++;
-            }
-            if (startPos == 0 || precCnt > ngramSize) {
-                if (precCnt > ngramSize) {
-                    precCnt = ngramSize;
-                }
-                break;
-            }
-            startPos--;
-            prevWasSpace = isSpace;
-        }
-
-        this.setBeginTokenIndex(precCnt);
-        this.setEndTokenIndex(this.beginTokenIndex + this.phrase.split(" ").length - 1);
-
-        // Get following
-        prevWasSpace = true;
-        while (endPos <= lastChar) {
-            isSpace = sentence.charAt(endPos) == ' ';
-            if (isSpace && !prevWasSpace) {
-                follCnt++;
-            }
-            if (endPos == lastChar || follCnt == ngramSize) {
-                break;
-            }
-            endPos++;
-            prevWasSpace = isSpace;
-        }
-        return sentence.substring(startPos, endPos).trim();
+    public void setSemanticTypeLabels(Set<String> semanticTypeLabels) {
+        this.semanticTypeLabels = new ArrayList<String>();
+        this.semanticTypeLabels.addAll(semanticTypeLabels);
     }
 }

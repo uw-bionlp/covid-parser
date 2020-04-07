@@ -1,22 +1,29 @@
 syntax = "proto3";
-package metamap;
+package covid.parser;
+
+import public "OpenNLP/OpenNLP.proto";
 
 option java_package = "edu.uw.bhi.bionlp.covid.parser.metamap";
 
+/*
+ * python3 -m grpc_tools.protoc -I ./ --python_out=. --grpc_python_out=. MetaMap/MetaMap.proto
+ */
+
 service MetaMap {
-    rpc ExtractNamedEntities (MetaMapInput) returns (MetaMapOutput) {}
+    rpc ExtractNamedEntities (MetaMapInput) returns (MetaMapOutput);
 }
 
 message MetaMapInput {
     string id = 1;
-    string text = 2;
+    repeated Sentence sentences = 2;
+    repeated string semantic_types = 3;
 }
 
 message MetaMapConcept {
     string cui = 1;
     string concept_name = 2;
     string source_phrase = 3;
-    string semantic_label = 4;
+    repeated string semantic_types = 4;
     int32 begin_sent_char_index = 5;
     int32 end_sent_char_index = 6;
     int32 begin_doc_char_index = 7;
@@ -34,7 +41,6 @@ message MetaMapSentence {
 
 message MetaMapOutput {
     string id = 1;
-    string text = 2;
-    repeated MetaMapSentence sentences = 3;
+    repeated MetaMapSentence sentences = 2;
+    repeated string errors = 3;
 }
-

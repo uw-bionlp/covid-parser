@@ -1,13 +1,16 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.Sentence;
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifierclient.AssertionClassifierClient;
+import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierClient;
 import edu.uw.bhi.bionlp.covid.parser.data.UMLSConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapSentence;
+import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.Sentence;
 
 import java.util.List;
+
+import org.javatuples.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,21 +19,11 @@ public class DocumentProcessor {
     MetamapLiteParser parser = new MetamapLiteParser();
     AssertionClassifierClient assertionClassifier = new AssertionClassifierClient();
     MetaMapConcept.Builder conceptBuilder = MetaMapConcept.newBuilder();
-    int ngramSize = 5;
 
-    public List<MetaMapSentence> processDocument(String note) {
+    public Pair<List<MetaMapSentence>, List<String>> processDocument(List<Sentence> sentences) {
         List<MetaMapSentence> mmSentences = new ArrayList<MetaMapSentence>();
+        List<String> errors = new ArrayList<String>();
         HashMap<String,String> assertionCache = new HashMap<String,String>();
-        
-        /* 
-         * Chunk into sentences.
-         */
-        List<Sentence> sentences = new ArrayList<Sentence>();
-        try {
-            sentences = assertionClassifier.detectSentences(note);
-        } catch (Exception ex) {
-            System.out.println("Error: failed to chunk sentences. " + ex.getMessage());
-        }
 
         /*
          * For each sentence.
@@ -46,7 +39,9 @@ public class DocumentProcessor {
             try {
                 concepts = parser.parseSentenceWithMetamap(sentence.getText());
             } catch (Exception ex) {
-                System.out.println("Error: failed to parse with Metamap. Sentence: '" + sentence.getText() + "'. " + ex.getMessage());
+                String errorMsg = "Error: failed to parse with Metamap. Sentence: " + sId + " '" + sentence.getText() + "'. " + ex.getMessage();
+                System.out.println(errorMsg);
+                errors.add(errorMsg);
             }
 
             /* 
@@ -55,16 +50,30 @@ public class DocumentProcessor {
 		    for (UMLSConcept concept : concepts) {
                 String prediction = "present";
                 try {
-                    String ngram = concept.getNgram(sentence.getText(), ngramSize);
-                    String inputs = concept.getPhrase() + "|" + concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
+
+                    /*
+                     * Check if this span has been seen before, if so use cached 
+                     * rather than re-checking assertion.
+                     */ 
+                    String inputs = concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
                     if (assertionCache.containsKey(inputs)) {
                         prediction = assertionCache.get(inputs);
+
+                    /*
+                     * Else predict assertion.
+                     */
                     } else {
-                        prediction = assertionClassifier.predictAssertion(ngram, concept.getBeginTokenIndex(), concept.getEndTokenIndex());
+                        prediction = assertionClassifier.predictAssertion(sentence.getText(), concept.getBeginCharIndex(), concept.getEndCharIndex());
                         assertionCache.put(inputs, prediction);
                     }
                 } catch (Exception ex) {
-                    System.out.println("Error: failed to predict concept. Concept: '" + concept.getConceptName() + "'. " + ex.getMessage());
+                    String errorMsg = "Error: failed to predict concept. Sentence: " + sId + ", Concept: '" + concept.getConceptName() + "'. " + ex.getMessage();
+                    System.out.println(errorMsg);
+                    errors.add(errorMsg);
+
+                /*
+                 * Add the final concept.
+                 */
                 } finally {
                     MetaMapConcept mmCon = conceptBuilder
                         .setConceptName(concept.getConceptName())
@@ -75,7 +84,7 @@ public class DocumentProcessor {
                         .setEndDocCharIndex(sentence.getBeginCharIndex() + concept.getEndCharIndex())
                         .setSourcePhrase(concept.getPhrase())
                         .setPrediction(prediction)
-                        .setSemanticLabel(concept.getSemanticTypeLabels())
+                        .addAllSemanticTypes(concept.getSemanticTypeLabels())
                         .build();
                         mmCons.add(mmCon);
                 }
@@ -90,6 +99,6 @@ public class DocumentProcessor {
                 .build();
             mmSentences.add(mmSent);
         }
-        return mmSentences;
+        return new Pair<List<MetaMapSentence>, List<String>>(mmSentences, errors);
     }
 }

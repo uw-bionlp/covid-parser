@@ -19,7 +19,7 @@ public class SentenceDetector {
     public SentenceDetector() {
 
         try {
-            InputStream modelIn = new FileInputStream("resources/opennlp/en-sent.bin");
+            InputStream modelIn = new FileInputStream("resources/open-nlp/en-sent.bin");
             SentenceModel model = new SentenceModel(modelIn);
             sentenceDetector = new SentenceDetectorME(model);
         } catch (Exception ex) {

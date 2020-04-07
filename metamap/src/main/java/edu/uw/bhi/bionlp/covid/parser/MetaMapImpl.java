@@ -2,6 +2,8 @@ package edu.uw.bhi.bionlp.covid.parser;
 
 import java.util.List;
 
+import org.javatuples.Pair;
+
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapGrpc.MetaMapImplBase;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapInput;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapOutput;
@@ -19,11 +21,15 @@ public class MetaMapImpl extends MetaMapImplBase {
     @Override
     public void extractNamedEntities(MetaMapInput request, StreamObserver<MetaMapOutput> responseObserver) {
 
-        List<MetaMapSentence> output = processor.processDocument(request.getText());
+        /*
+         * Process. Output is a tuple<sentences,errors>.
+         */
+        Pair<List<MetaMapSentence>, List<String>> output = processor.processDocument(request.getSentencesList());
+        
         MetaMapOutput response = MetaMapOutput.newBuilder()
-            .addAllSentences(output)
+            .addAllSentences(output.getValue0())
+            .addAllErrors(output.getValue1())
             .setId(request.getId())
-            .setText(request.getText())
             .build();
 
         responseObserver.onNext(response);
