@@ -23,7 +23,7 @@ message MetaMapConcept {
     string cui = 1;
     string concept_name = 2;
     string source_phrase = 3;
-    string semantic_label = 4;
+    repeated string semantic_types = 4;
     int32 begin_sent_char_index = 5;
     int32 end_sent_char_index = 6;
     int32 begin_doc_char_index = 7;

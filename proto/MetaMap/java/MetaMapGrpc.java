@@ -19,12 +19,12 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.7.0)",
-    comments = "Source: MetaMap.proto")
+    comments = "Source: MetaMap/MetaMap.proto")
 public final class MetaMapGrpc {
 
   private MetaMapGrpc() {}
 
-  public static final String SERVICE_NAME = "metamap.MetaMap";
+  public static final String SERVICE_NAME = "covid.parser.MetaMap";
 
   // Static method descriptors that strictly reflect the proto.
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
@@ -33,7 +33,7 @@ public final class MetaMapGrpc {
       io.grpc.MethodDescriptor.<edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapInput, edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapOutput>newBuilder()
           .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
           .setFullMethodName(generateFullMethodName(
-              "metamap.MetaMap", "ExtractNamedEntities"))
+              "covid.parser.MetaMap", "ExtractNamedEntities"))
           .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
               edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapInput.getDefaultInstance()))
           .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(

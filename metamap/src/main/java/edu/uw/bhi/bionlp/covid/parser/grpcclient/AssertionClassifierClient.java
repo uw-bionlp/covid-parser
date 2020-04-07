@@ -1,8 +1,5 @@
 package edu.uw.bhi.bionlp.covid.parser.grpcclient;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierGrpc;
 import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierGrpc.*;
 import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.*;
@@ -19,26 +16,13 @@ public class AssertionClassifierClient {
         blockingStub = AssertionClassifierGrpc.newBlockingStub(channel);
     }
 
-    public List<Sentence> detectSentences(String text) {
-
-        SentenceDetectionOutput output;
-        SentenceDetectionInput request = SentenceDetectionInput.newBuilder().setText(text).build();
-
-        try {
-            output = blockingStub.detectSentences(request);
-        } catch (Exception ex) {
-            return new ArrayList<Sentence>();
-        }
-        return output.getSentencesList();
-    }
-
     public String predictAssertion(String sentence, int beginIndex, int endIndex) {
 
         AssertionClassifierOutput output;
         AssertionClassifierInput request = AssertionClassifierInput.newBuilder()
             .setText(sentence)
-            .setStartIndex(beginIndex)
-            .setEndIndex(endIndex)
+            .setStartCharIndex(beginIndex)
+            .setEndCharIndex(endIndex)
             .build();
 
         try {

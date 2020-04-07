@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author wlau
  * @author ndobb
  */
 public class MetamapLiteParser implements IMetamapParser {
@@ -64,15 +63,6 @@ public class MetamapLiteParser implements IMetamapParser {
             for (Ev ev : entity.getEvSet()) {
                 ConceptInfo conceptInfo = ev.getConceptInfo();
                 String cui = conceptInfo.getCUI();
-                String semanticTypes = "";
-                List<String> SemanticTypeList = new ArrayList<String>(conceptInfo.getSemanticTypeSet());
-                if (conceptInfo.getSemanticTypeSet().size() == 1) {
-                    semanticTypes = SemanticTypeList.get(0);
-                } else {
-                    for (String semType : SemanticTypeList) {
-                        semanticTypes += semType + "|";
-                    }
-                }
 
                 if (cuiList.get(cui) == null) {
                     UMLSConcept concept = new UMLSConcept();
@@ -81,7 +71,7 @@ public class MetamapLiteParser implements IMetamapParser {
                     concept.setPhrase(matchedText);
                     concept.setBeginCharIndex(charStartIdx);
                     concept.setEndCharIndex(charStopIdx);
-                    concept.setSemanticTypeLabels(semanticTypes);
+                    concept.setSemanticTypeLabels(conceptInfo.getSemanticTypeSet());
                     concepts.add(concept);
                 }
                 cuiList.put(cui, true);
