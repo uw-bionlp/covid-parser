@@ -1,5 +1,9 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.javatuples.Pair;
 import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierClient;
 import edu.uw.bhi.bionlp.covid.parser.data.UMLSConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
@@ -7,12 +11,6 @@ import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapSentence;
 import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.Sentence;
 
-import java.util.List;
-
-import org.javatuples.Pair;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DocumentProcessor {
 

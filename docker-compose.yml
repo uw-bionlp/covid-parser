@@ -26,6 +26,7 @@ services:
                 aliases:
                     - metamap
         depends_on:
+            - open-nlp
             - assertion-classifier
 
 networks:
