@@ -9,6 +9,7 @@ import gov.nih.nlm.nls.metamap.lite.types.Ev;
 import gov.nih.nlm.nls.ner.MetaMapLite;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -58,10 +59,9 @@ public class MetamapLiteParser implements IMetamapParser {
             String matchedText = entity.getMatchedText();
             int charStartIdx = entity.getStart();
             int charStopIdx = charStartIdx + entity.getLength();
-            List<String> cuiList = new ArrayList<String>();
+            HashMap<String,Boolean> cuiList = new HashMap<String,Boolean>();
 
             for (Ev ev : entity.getEvSet()) {
-
                 ConceptInfo conceptInfo = ev.getConceptInfo();
                 String cui = conceptInfo.getCUI();
                 String semanticTypes = "";
@@ -74,7 +74,7 @@ public class MetamapLiteParser implements IMetamapParser {
                     }
                 }
 
-                if (!cuiList.contains(cui)) {
+                if (cuiList.get(cui) == null) {
                     UMLSConcept concept = new UMLSConcept();
                     concept.setCUI(cui);
                     concept.setConceptName(conceptInfo.getPreferredName());
@@ -84,7 +84,7 @@ public class MetamapLiteParser implements IMetamapParser {
                     concept.setSemanticTypeLabels(semanticTypes);
                     concepts.add(concept);
                 }
-                cuiList.add(cui);
+                cuiList.put(cui, true);
             }
         }
         return concepts;
