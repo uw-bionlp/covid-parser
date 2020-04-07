@@ -24,29 +24,16 @@ public final class AssertionClassifierGrpc {
 
   private AssertionClassifierGrpc() {}
 
-  public static final String SERVICE_NAME = "assertionclassifier.AssertionClassifier";
+  public static final String SERVICE_NAME = "covid.parser.AssertionClassifier";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  public static final io.grpc.MethodDescriptor<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput,
-      edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput> METHOD_DETECT_SENTENCES =
-      io.grpc.MethodDescriptor.<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput, edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput>newBuilder()
-          .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-          .setFullMethodName(generateFullMethodName(
-              "assertionclassifier.AssertionClassifier", "DetectSentences"))
-          .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-              edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput.getDefaultInstance()))
-          .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-              edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput.getDefaultInstance()))
-          .setSchemaDescriptor(new AssertionClassifierMethodDescriptorSupplier("DetectSentences"))
-          .build();
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   public static final io.grpc.MethodDescriptor<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput,
       edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput> METHOD_PREDICT_ASSERTION =
       io.grpc.MethodDescriptor.<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput, edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput>newBuilder()
           .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
           .setFullMethodName(generateFullMethodName(
-              "assertionclassifier.AssertionClassifier", "PredictAssertion"))
+              "covid.parser.AssertionClassifier", "PredictAssertion"))
           .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
               edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput.getDefaultInstance()))
           .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
@@ -83,13 +70,6 @@ public final class AssertionClassifierGrpc {
 
     /**
      */
-    public void detectSentences(edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput request,
-        io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput> responseObserver) {
-      asyncUnimplementedUnaryCall(METHOD_DETECT_SENTENCES, responseObserver);
-    }
-
-    /**
-     */
     public void predictAssertion(edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput request,
         io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput> responseObserver) {
       asyncUnimplementedUnaryCall(METHOD_PREDICT_ASSERTION, responseObserver);
@@ -97,13 +77,6 @@ public final class AssertionClassifierGrpc {
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            METHOD_DETECT_SENTENCES,
-            asyncUnaryCall(
-              new MethodHandlers<
-                edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput,
-                edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput>(
-                  this, METHODID_DETECT_SENTENCES)))
           .addMethod(
             METHOD_PREDICT_ASSERTION,
             asyncUnaryCall(
@@ -135,14 +108,6 @@ public final class AssertionClassifierGrpc {
 
     /**
      */
-    public void detectSentences(edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput request,
-        io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(METHOD_DETECT_SENTENCES, getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     */
     public void predictAssertion(edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput request,
         io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput> responseObserver) {
       asyncUnaryCall(
@@ -166,13 +131,6 @@ public final class AssertionClassifierGrpc {
     protected AssertionClassifierBlockingStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       return new AssertionClassifierBlockingStub(channel, callOptions);
-    }
-
-    /**
-     */
-    public edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput detectSentences(edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput request) {
-      return blockingUnaryCall(
-          getChannel(), METHOD_DETECT_SENTENCES, getCallOptions(), request);
     }
 
     /**
@@ -203,14 +161,6 @@ public final class AssertionClassifierGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput> detectSentences(
-        edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput request) {
-      return futureUnaryCall(
-          getChannel().newCall(METHOD_DETECT_SENTENCES, getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput> predictAssertion(
         edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput request) {
       return futureUnaryCall(
@@ -218,8 +168,7 @@ public final class AssertionClassifierGrpc {
     }
   }
 
-  private static final int METHODID_DETECT_SENTENCES = 0;
-  private static final int METHODID_PREDICT_ASSERTION = 1;
+  private static final int METHODID_PREDICT_ASSERTION = 0;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -238,10 +187,6 @@ public final class AssertionClassifierGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_DETECT_SENTENCES:
-          serviceImpl.detectSentences((edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionInput) request,
-              (io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.SentenceDetectionOutput>) responseObserver);
-          break;
         case METHODID_PREDICT_ASSERTION:
           serviceImpl.predictAssertion((edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierInput) request,
               (io.grpc.stub.StreamObserver<edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.AssertionClassifierOutput>) responseObserver);
@@ -307,7 +252,6 @@ public final class AssertionClassifierGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new AssertionClassifierFileDescriptorSupplier())
-              .addMethod(METHOD_DETECT_SENTENCES)
               .addMethod(METHOD_PREDICT_ASSERTION)
               .build();
         }

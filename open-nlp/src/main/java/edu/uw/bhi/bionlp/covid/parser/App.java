@@ -1,13 +1,25 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
-/**
- * Hello world!
- *
- */
+import io.grpc.*;
+
 public class App 
 {
-    public static void main( String[] args )
+    public static void main( String[] args ) throws Exception
     {
-        System.out.println( "Hello World!" );
+      Server server = ServerBuilder.forPort(8080)
+        .addService(new OpenNLPImpl())
+        .build();
+
+      // Start the server
+      server.start();
+
+      // Server threads are running in the background.
+      System.out.println("OpenNLP is up!");
+
+      // Don't exit the main thread. Wait until server is terminated.
+      server.awaitTermination();
     }
 }
+
+// Test with: 
+// mvn -DskipTests package exec:java -Dexec.mainClass=edu.uw.bhi.bionlp.covid.parser.App
