@@ -3,7 +3,6 @@ FROM maven:3.5-jdk-8 AS build
 # Copy deps and source over
 COPY pom.xml /usr/src/app/  
 COPY src /usr/src/app/src/
-COPY lib /usr/src/app/lib/
 WORKDIR /usr/src/app
 
 # Compile and package into jar
