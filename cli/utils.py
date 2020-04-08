@@ -1,5 +1,5 @@
 def mm_response_to_dict(response):
-    output = { 'id': response.id, 'text': response.text, 'sentences': [] }
+    output = { 'id': response.id, 'sentences': [] }
     for sent in response.sentences:
         sentence = { 
             'id': sent.id, 
@@ -15,7 +15,7 @@ def mm_response_to_dict(response):
                 'beginDocumentCharIndex': con.begin_doc_char_index,
                 'endDocumentCharIndex': con.end_doc_char_index,
                 'cui': con.cui,
-                'semanticLabel': con.semantic_label,
+                'semanticTypes': con.semantic_types,
                 'sourcePhrase': con.source_phrase,
                 'conceptName': con.concept_name,
                 'prediction': con.prediction
