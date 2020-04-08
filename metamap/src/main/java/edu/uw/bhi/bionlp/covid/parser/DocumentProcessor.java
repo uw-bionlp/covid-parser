@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.javatuples.Pair;
 import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierClient;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapConcept;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapSentence;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.Sentence;
 import edu.uw.bhi.bionlp.covid.parser.data.UMLSConcept;
 import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapConcept;
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapSentence;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.Sentence;
 
 
 public class DocumentProcessor {

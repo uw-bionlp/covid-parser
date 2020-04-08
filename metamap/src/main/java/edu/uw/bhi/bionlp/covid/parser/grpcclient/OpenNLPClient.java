@@ -3,9 +3,11 @@ package edu.uw.bhi.bionlp.covid.parser.grpcclient;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPGrpc;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPGrpc.*;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.*;
+import edu.uw.bhi.bionlp.covid.parser.OpenNLPGrpc;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.Sentence;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.SentenceDetectionInput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.SentenceDetectionOutput;
+import edu.uw.bhi.bionlp.covid.parser.OpenNLPGrpc.*;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 

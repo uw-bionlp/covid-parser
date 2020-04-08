@@ -1,7 +1,8 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierGrpc.AssertionClassifierImplBase;
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.*;
+import edu.uw.bhi.bionlp.covid.parser.AssertionClassifierGrpc.AssertionClassifierImplBase;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.AssertionClassifierInput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.AssertionClassifierOutput;
 import edu.uw.bhi.uwassert.AssertionClassification;
 import io.grpc.stub.StreamObserver;
 
@@ -35,7 +36,8 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
 
     String predict (String sentence, int startIndex, int endIndex) {
         try {
-            return AssertionClassification.predictMP(sentence, new IntPair(startIndex, endIndex));  
+            NgramParameters params = getNgram(sentence, 5, startIndex, endIndex);
+            return AssertionClassification.predictMP(params.ngram, new IntPair(params.beginTokenIndex, params.endTokenIndex));  
         } catch (Exception ex) {
             System.out.println("Error: failed to assert. Sentence: '" + sentence + "', StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". " + ex.getMessage());
             return "present";
@@ -50,11 +52,11 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
         int endPos = endCharIndex;
         boolean isSpace = false;
         boolean prevWasSpace = true;
-        String sent = sentence.trim().replaceAll("\\s+", " ");
+        String sent = sentence.replaceAll("\n", " ");
 
         // Get preceding
         while (startPos > -1) {
-            isSpace = sentence.charAt(startPos) == ' ';
+            isSpace = sent.charAt(startPos) == ' ';
             if (isSpace && !prevWasSpace) {
                 precCnt++;
             }
@@ -71,7 +73,7 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
         // Get following
         prevWasSpace = true;
         while (endPos <= lastChar) {
-            isSpace = sentence.charAt(endPos) == ' ';
+            isSpace = sent.charAt(endPos) == ' ';
             if (isSpace && !prevWasSpace) {
                 follCnt++;
             }
@@ -83,9 +85,9 @@ public class AssertionClassifierImpl extends AssertionClassifierImplBase {
         }
 
         return new NgramParameters(
-            sentence.substring(startPos, endPos).trim(), 
+            sent.substring(startPos, endPos).trim(), 
             precCnt, 
-            precCnt + sentence.substring(beginCharIndex, endCharIndex).split(" ").length-1
+            precCnt + sent.substring(beginCharIndex, endCharIndex).split(" ").length-1
         );
     }
 }

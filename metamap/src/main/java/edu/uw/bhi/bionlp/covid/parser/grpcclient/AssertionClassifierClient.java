@@ -1,8 +1,9 @@
 package edu.uw.bhi.bionlp.covid.parser.grpcclient;
 
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierGrpc;
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierGrpc.*;
-import edu.uw.bhi.bionlp.covid.parser.assertionclassifier.AssertionClassifierOuterClass.*;
+import edu.uw.bhi.bionlp.covid.parser.AssertionClassifierGrpc;
+import edu.uw.bhi.bionlp.covid.parser.AssertionClassifierGrpc.*;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.AssertionClassifierInput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.AssertionClassifierOutput;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 

@@ -1,24 +1,5 @@
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160906646_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160906435_5115] 
+CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1586303233123_32258/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1586303232874_32258] 
 OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160907650_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160907607_5115] 
-OUTPUT>Accuracy = 100% (1/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160907857_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160907808_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908056_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908019_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908268_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908214_5115] 
-OUTPUT>Accuracy = 100% (1/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908445_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908437_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908607_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908600_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908747_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908741_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160908893_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160908882_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160909032_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160909020_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160909168_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160909158_5115] 
-OUTPUT>Accuracy = 0% (0/1)
-CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1585160909303_5115/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1585160909296_5115] 
+Stream closed
+CMD: [resources/assertion-classifier/liblinear-1.93/predict] [resources/assertion-classifier/liblinear-1.93/working/1586303237629_32258/runtext_nosplit.dat] [resources/assertion-classifier//svm_model/restrict/train_nosplit.dat.model] [resources/assertion-classifier//features/runtext.predict_1586303237613_32258] 
 OUTPUT>Accuracy = 0% (0/1)
