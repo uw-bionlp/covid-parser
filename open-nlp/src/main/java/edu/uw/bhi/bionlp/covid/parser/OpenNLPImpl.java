@@ -29,7 +29,8 @@ public class OpenNLPImpl extends OpenNLPImplBase {
 
         if (textLen > 0) {
             int lastCharIdx = textLen-1;
-            List<Span> spans = sentenceDetector.detectBoundaries(input.getText());
+            int i = 0;
+            List<Span> spans = sentenceDetector.detectBoundaries(text);
             for (Span span : spans) {
                 int start = span.getStart();
                 int end = span.getEnd();
@@ -38,14 +39,18 @@ public class OpenNLPImpl extends OpenNLPImplBase {
                     .setBeginCharIndex(start)
                     .setEndCharIndex(end)
                     .setText(sentText)
+                    .setId(i)
                     .build();
                 sentences.add(sentence);
+                i++;
             }
         }
 
         SentenceDetectionOutput response = SentenceDetectionOutput
             .newBuilder()
             .addAllSentences(sentences)
+            .setText(text)
+            .setId(input.getId())
             .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
