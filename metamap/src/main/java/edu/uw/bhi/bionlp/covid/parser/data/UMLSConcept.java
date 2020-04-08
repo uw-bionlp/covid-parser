@@ -88,7 +88,6 @@ public class UMLSConcept {
     }
 
     public void setSemanticTypeLabels(Set<String> semanticTypeLabels) {
-        this.semanticTypeLabels = new ArrayList<String>();
-        this.semanticTypeLabels.addAll(semanticTypeLabels);
+        this.semanticTypeLabels = new ArrayList<String>(semanticTypeLabels);
     }
 }

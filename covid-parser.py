@@ -9,10 +9,8 @@ from time import localtime, strftime
 
 from cli.utils import mm_response_to_dict
 
-from proto.OpenNLP.python.OpenNLP_pb2 import Sentence, SentenceDetectionInput, SentenceDetectionOutput
-from proto.OpenNLP.python.OpenNLP_pb2_grpc import OpenNLPStub
-from proto.MetaMap.python.MetaMap_pb2 import MetaMapInput, MetaMapOutput
-from proto.MetaMap.python.MetaMap_pb2_grpc import MetaMapStub
+from proto.python.CovidParser_pb2 import Sentence, SentenceDetectionInput, SentenceDetectionOutput, MetaMapInput, MetaMapOutput
+from proto.python.CovidParser_pb2_grpc import OpenNLPStub, MetaMapStub
 
 OPEN_NLP_PORT = '42400'
 METAMAP_PORT = '42402'
@@ -31,7 +29,7 @@ def parse_args():
     return args.file_or_dir, args.output, path_valid, is_file
 
 
-def parse_with_metamap(mm_stub, id, sentences, semantic_types):
+def parse_with_metamap(mm_stub, doc, semantic_types):
     """ Parse the document with MetaMap and Assertion Classifier.
 
     Arguments:
@@ -41,7 +39,7 @@ def parse_with_metamap(mm_stub, id, sentences, semantic_types):
     - semantic_types -- UMLS types to include
     """
     
-    response = mm_stub.ExtractNamedEntities(MetaMapInput(id=id, sentences=sentences, semantic_types=semantic_types))
+    response = mm_stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=semantic_types))
     return mm_response_to_dict(response)
 
 def split_sentences(open_nlp_stub, id, text):
@@ -59,15 +57,17 @@ def write_output(output, output_path):
 
 
 def get_processors():
-    METAMAP = 'metamap'
-    stubs = {}
+    stubs      = {}
     processors = []
+    channels   = []
 
     # MetaMap
-    stubs[METAMAP] = grpc.insecure_channel(f'0.0.0.0:{METAMAP_PORT}')
-    processors.append(lambda stubs, doc_id, sentences: parse_with_metamap(stubs[METAMAP], doc_id, sentences, []))
+    mm_chan = grpc.insecure_channel(f'0.0.0.0:{METAMAP_PORT}')
+    channels.append(mm_chan)
+    stubs['metamap'] = MetaMapStub(mm_chan)
+    processors.append(lambda stubs, doc: parse_with_metamap(stubs['metamap'], doc, []))
 
-    return stubs, processors
+    return channels, stubs, processors
 
 def process_file(open_nlp_stub, filepath, stubs, processors):
 
@@ -77,12 +77,11 @@ def process_file(open_nlp_stub, filepath, stubs, processors):
         doc_id = Path(filepath).stem
 
     # Get sentences. 
-    sentences = split_sentences(open_nlp_stub, doc_id, text)
+    doc = split_sentences(open_nlp_stub, doc_id, text)
 
     for processor in processors:
-        results = processor(stubs, doc_id, sentences)
-    x=1
-
+        results.append(processor(stubs, doc))
+    return results
 
 def run():
     """ Run the client. """
@@ -96,8 +95,8 @@ def run():
     # Make output directory.
     # Path(output_path).mkdir(parents=True, exist_ok=True)
 
-    # Get stubs and processors.
-    stubs, processors = get_processors()
+    # Get channels.
+    channels, stubs, processors = get_processors()
 
     # Get OpenNLP stub.
     with grpc.insecure_channel(f'0.0.0.0:{OPEN_NLP_PORT}') as channel:
@@ -114,7 +113,10 @@ def run():
             print(f"Found {len(files)} text files in '{file_or_dir}'...")
             for i,f in enumerate(files, 1):
                 print(f"Parsing file {i}...")
-                process_file(open_nlp_stub, file_or_dir, stubs, processors)
+                process_file(open_nlp_stub, f, stubs, processors)
+
+    for channel in channels:
+        channel.close()
             
     print(f"All done! Results written to '{output_path}'") 
 
