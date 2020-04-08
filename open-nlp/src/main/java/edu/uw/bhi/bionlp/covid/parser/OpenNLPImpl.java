@@ -3,11 +3,11 @@ package edu.uw.bhi.bionlp.covid.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPGrpc.OpenNLPImplBase;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.Sentence;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.SentenceDetectionInput;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.SentenceDetectionOutput;
-import edu.uw.bhi.bionlp.covid.parser.opennlp.OpenNLPOuterClass.Sentence.Builder;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.Sentence;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.SentenceDetectionInput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.SentenceDetectionOutput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.Sentence.Builder;
+import edu.uw.bhi.bionlp.covid.parser.OpenNLPGrpc.OpenNLPImplBase;
 import io.grpc.stub.StreamObserver;
 import opennlp.tools.util.Span;
 

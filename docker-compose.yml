@@ -3,6 +3,8 @@ services:
     open-nlp:
         build:
             context: open-nlp/
+        ports:
+            - '42400:8080'
         networks:
             default:
                 aliases:
@@ -11,7 +13,7 @@ services:
         build:
             context: assertion-classifier/
         ports:
-            - "8080:8080"
+            - '42401:8080'
         networks:
             default:
                 aliases:
@@ -20,7 +22,7 @@ services:
         build:
             context: metamap/
         ports:
-            - "5000:5000"
+            - '42402:8080'
         networks:
             default:
                 aliases:
@@ -28,7 +30,6 @@ services:
         depends_on:
             - open-nlp
             - assertion-classifier
-
 networks:
     default:
         driver: bridge

@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.javatuples.Pair;
 
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapGrpc.MetaMapImplBase;
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapInput;
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapOutput;
-import edu.uw.bhi.bionlp.covid.parser.metamap.MetaMapOuterClass.MetaMapSentence;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapInput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapOutput;
+import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapSentence;
+import edu.uw.bhi.bionlp.covid.parser.MetaMapGrpc.MetaMapImplBase;
 import io.grpc.stub.StreamObserver;
 
 /**
