@@ -24,7 +24,10 @@ public class MetaMapImpl extends MetaMapImplBase {
         /*
          * Process. Output is a tuple<sentences,errors>.
          */
-        Pair<List<MetaMapSentence>, List<String>> output = processor.processDocument(request.getSentencesList());
+        Pair<List<MetaMapSentence>, List<String>> output = processor.processDocument(
+            request.getSentencesList(), 
+            request.getSemanticTypesList()
+        );
         
         MetaMapOutput response = MetaMapOutput.newBuilder()
             .addAllSentences(output.getValue0())

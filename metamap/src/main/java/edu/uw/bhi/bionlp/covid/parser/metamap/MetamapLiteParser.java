@@ -9,9 +9,11 @@ import gov.nih.nlm.nls.metamap.lite.types.Ev;
 import gov.nih.nlm.nls.ner.MetaMapLite;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +49,7 @@ public class MetamapLiteParser implements IMetamapParser {
         return metaMapLiteInst.processDocument(document);
     }
 
-    public List<UMLSConcept> parseSentenceWithMetamap(String sentenceText) throws Exception {
+    public List<UMLSConcept> parseSentenceWithMetamap(String sentenceText, HashSet<String> semanticTypesOfInterest) throws Exception {
         BioCDocument document = FreeText.instantiateBioCDocument(sentenceText);
         document.setID("1");
 
@@ -58,23 +60,28 @@ public class MetamapLiteParser implements IMetamapParser {
             String matchedText = entity.getMatchedText();
             int charStartIdx = entity.getStart();
             int charStopIdx = charStartIdx + entity.getLength();
-            HashMap<String,Boolean> cuiList = new HashMap<String,Boolean>();
+            HashSet<String> cuiList = new HashSet<String>();
 
             for (Ev ev : entity.getEvSet()) {
                 ConceptInfo conceptInfo = ev.getConceptInfo();
                 String cui = conceptInfo.getCUI();
+                Set<String> semanticTypes = conceptInfo.getSemanticTypeSet();
+                
+                if (Collections.disjoint(semanticTypesOfInterest, semanticTypes)) {
+                    continue;
+                }
 
-                if (cuiList.get(cui) == null) {
+                if (!cuiList.contains(cui)) {
                     UMLSConcept concept = new UMLSConcept();
                     concept.setCUI(cui);
                     concept.setConceptName(conceptInfo.getPreferredName());
                     concept.setPhrase(matchedText);
                     concept.setBeginCharIndex(charStartIdx);
                     concept.setEndCharIndex(charStopIdx);
-                    concept.setSemanticTypeLabels(conceptInfo.getSemanticTypeSet());
+                    concept.setSemanticTypeLabels(semanticTypes);
                     concepts.add(concept);
+                    cuiList.add(cui);
                 }
-                cuiList.put(cui, true);
             }
         }
         return concepts;
