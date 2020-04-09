@@ -17,8 +17,8 @@ def parse_args():
     parser.add_argument('file_or_dir', help='Absolute or relative path to the file or directory to parse.')
     parser.add_argument('-o', '--output_path', help='Directory to write output to. Defaults to /output/<now>/')
     parser.add_argument('--metamap', help='Whether to parse with MetaMap or not. Defaults to false.', default=False, dest='metamap', action='store_true')
-    parser.add_argument('--metamap_semantic_labels', help='MetaMap semantic labels to include. Defaults to all.', nargs='+')
-    parser.add_argument('--brat', help='Output BRAT-format annotation files, in addition to JSON.', default=False)
+    parser.add_argument('--metamap_semantic_types', help="MetaMap semantic types to include (eg, 'sosy', 'fndg'). Defaults to all.", nargs='+')
+    parser.add_argument('--brat', help='Output BRAT-format annotation files, in addition to JSON.', default=False, dest='brat', action='store_true')
 
     try:
         args = parser.parse_args()
@@ -45,6 +45,10 @@ def get_clients(args):
     clients = []
     if args.metamap:
         clients.append(MetaMapClient(args))
+
+    if args.brat:
+        for client in client:
+            Path(f'{args.output_path}{os.path.sep}brat_{client.name}').mkdir(parents=True, exist_ok=True)
     
     return clients
 
