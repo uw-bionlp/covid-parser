@@ -4,10 +4,10 @@ from proto.python.CovidParser_pb2_grpc import MetaMapStub
 
 class MetaMapClient():
     def __init__(self, args):
-        self.name            = 'metamap'
-        self.host            = '0.0.0.0'
-        self.port            = '42402'
-        self.semantic_labels = args.metamap_semantic_labels
+        self.name           = 'metamap'
+        self.host           = '0.0.0.0'
+        self.port           = '42402'
+        self.semantic_types = args.metamap_semantic_types
         self.open()
 
     def open(self):
@@ -18,7 +18,7 @@ class MetaMapClient():
         self.channel.close()
 
     def process(self, doc):
-        response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_labels))
+        response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_types))
         return response
 
     def to_dict(self, response):
@@ -38,7 +38,7 @@ class MetaMapClient():
                     'beginDocumentCharIndex': con.begin_doc_char_index,
                     'endDocumentCharIndex': con.end_doc_char_index,
                     'cui': con.cui,
-                    'semanticTypes': con.semantic_types,
+                    'semanticTypes': [ st for st in con.semantic_types ],
                     'sourcePhrase': con.source_phrase,
                     'conceptName': con.concept_name,
                     'prediction': con.prediction
@@ -55,3 +55,13 @@ class MetaMapClient():
             sentence[self.name] = client_json['sentences'][i]['concepts']
 
         return base_json
+
+    def to_brat(self, client_json):
+        t = 1
+        brat_rows = []
+        for sentence in client_json['sentences']:
+            for con in sentence['concepts']:
+                row = f"T{t}    {con['prediction']} {con['beginDocumentCharIndex']} {con['endDocumentCharIndex']}    {con['sourcePhrase']}"
+                brat_rows.append(row)
+                t += 1
+        return brat_rows
