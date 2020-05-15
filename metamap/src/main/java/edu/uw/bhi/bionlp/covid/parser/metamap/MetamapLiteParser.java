@@ -32,7 +32,7 @@ public class MetamapLiteParser implements IMetamapParser {
             MetaMapLite.expandModelsDir(myProperties,
                     "resources/public_mm_lite/data/models");
             MetaMapLite.expandIndexDir(myProperties,
-                    "resources/public_mm_lite/data/ivf/2018ABascii/USAbase");
+                    "resources/public_mm_lite/data/ivf/");
             myProperties.setProperty("metamaplite.excluded.termsfile",
                     "resources/public_mm_lite/data/specialterms.txt");
 
