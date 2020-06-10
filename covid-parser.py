@@ -70,18 +70,35 @@ def process_doc(filepath, opennlp_client, clients, output_path):
     write_output(json, output_path)
 
 def do_job(remaining, completed, opennlp_client, clients, output_path):
+    errored, succeeded = 0, 1
     while True:
         try:
             doc = remaining.get_nowait()
         except queue.Empty:
             break
         else:
-            sys.stdout.write(f'Processing document "{doc}" by {current_process().name}\n')
+            sys.stdout.write(f'Processing document "{doc}" by {current_process().name}...\n')
             try:
                 process_doc(doc, opennlp_client, clients, output_path)
                 completed.put(doc)
+                succeeded += 1
             except Exception as ex:
-                sys.stdout.write(ex)
+                if 'inactiverpcerror' in str(ex).lower():
+                    errored += 1
+
+                    # If only run a handful of times, continue trying.
+                    if errored+succeeded < 5:
+                        remaining.put(doc)
+                        sys.stdout.write(f'"{doc}" failed, retrying...\n')
+                        continue
+
+                    # If under threshold (and thus likely going smoothly), retry.
+                    pct = errored / succeeded
+                    if pct < 0.2:
+                        remaining.put(doc)
+                    else:
+                        sys.stdout.write(f'{round(pct * 100,1)}% of documents failed, not retrying "{doc}"...\n')
+                
     return True
 
 def main():
