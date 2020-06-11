@@ -1,13 +1,18 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
+import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierChannelManager;
 import io.grpc.*;
 
 public class App 
 {
     public static void main( String[] args ) throws Exception
     {
-      Server server = ServerBuilder.forPort(8080)
-        .addService(new MetaMapImpl())
+      // Generate single share-able assertion classifier channel.
+      AssertionClassifierChannelManager assertionClassifierChannelManager = new AssertionClassifierChannelManager();
+
+      // Build server
+      Server server = ServerBuilder.forPort(Integer.parseInt(System.getenv("METAMAP_PORT")))
+        .addService(new MetaMapImpl(assertionClassifierChannelManager))
         .build();
 
       // Start the server

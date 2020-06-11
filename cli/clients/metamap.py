@@ -2,20 +2,26 @@ import grpc
 from proto.python.CovidParser_pb2 import MetaMapInput, MetaMapOutput
 from proto.python.CovidParser_pb2_grpc import MetaMapStub
 
-class MetaMapClient():
-    def __init__(self, args):
-        self.name           = 'metamap'
-        self.host           = '0.0.0.0'
-        self.port           = '42402'
-        self.semantic_types = args.metamap_semantic_types
-        self.open()
+class MetaMapChannel():
+    def __init__(self):
+        self.name    = 'metamap'
+        self.host    = '0.0.0.0'
+        self.port    = '42402'
 
     def open(self):
         self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
-        self.stub = MetaMapStub(self.channel)
-    
+
     def close(self):
         self.channel.close()
+
+    def generate_client(self, args):
+        return MetaMapClient(self.channel, args)
+
+class MetaMapClient():
+    def __init__(self, channel, args):
+        self.name = 'metamap'
+        self.stub = MetaMapStub(channel)
+        self.semantic_types = args.metamap_semantic_types
 
     def process(self, doc):
         response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_types))

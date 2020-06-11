@@ -9,9 +9,10 @@ from pathlib import Path
 from argparse import ArgumentParser
 from time import localtime, strftime
 from multiprocessing.dummy import Process, Queue, current_process
+import threading
 
-from cli.clients.metamap import MetaMapClient
-from cli.clients.opennlp import OpenNLPClient
+from cli.clients.metamap import MetaMapChannel
+from cli.clients.opennlp import OpenNLPChannel
 
 def parse_args():
     parser = ArgumentParser()
@@ -42,15 +43,15 @@ def write_output(output, output_path):
     with open(f'{output_path}{os.path.sep}{filename}.json', 'w') as f:
         json.dump(output, f, ensure_ascii=False, indent=4)
 
-def get_clients(args):
-    clients = []
+def get_channels(args):
+    channels = []
     if args.metamap:
-        clients.append(MetaMapClient(args))
+        channels.append(MetaMapChannel())
     if args.brat:
-        for client in client:
-            Path(f'{args.output_path}{os.path.sep}brat_{client.name}').mkdir(parents=True, exist_ok=True)
+        for channel in channels:
+            Path(f'{args.output_path}{os.path.sep}brat_{channel.name}').mkdir(parents=True, exist_ok=True)
     
-    return clients
+    return channels
 
 def process_doc(filepath, opennlp_client, clients, output_path):
     with open(filepath, 'r') as f:
@@ -69,36 +70,40 @@ def process_doc(filepath, opennlp_client, clients, output_path):
 
     write_output(json, output_path)
 
-def do_job(remaining, completed, opennlp_client, clients, output_path):
+def do_job(remaining, completed, args, opennlp_channel, channels, thread_idx):
+    
+    # Get gRPC clients.
+    clients = [ channel.generate_client(args) for channel in channels ]
+    opennlp_client = opennlp_channel.generate_client()
     errored, succeeded = 0, 1
+
     while True:
         try:
             doc = remaining.get_nowait()
         except queue.Empty:
             break
-        else:
-            sys.stdout.write(f'Processing document "{doc}" by {current_process().name}...\n')
-            try:
-                process_doc(doc, opennlp_client, clients, output_path)
-                completed.put(doc)
-                succeeded += 1
-            except Exception as ex:
-                if 'inactiverpcerror' in str(ex).lower():
-                    errored += 1
+        sys.stdout.write(f'Processing document "{doc}"... by thread {thread_idx}\n')
+        try:
+            process_doc(doc, opennlp_client, clients, args.output_path)
+            completed.put(doc)
+            succeeded += 1
+        except Exception as ex:
+            errored += 1
 
-                    # If only run a handful of times, continue trying.
-                    if errored+succeeded < 5:
-                        remaining.put(doc)
-                        sys.stdout.write(f'"{doc}" failed, retrying...\n')
-                        continue
+            # If only run a handful of times, continue trying.
+            if errored+succeeded < 5:
+                remaining.put(doc)
+                sys.stdout.write(f'"{doc}" failed, retrying...\n')
+                continue
 
-                    # If under threshold (and thus likely going smoothly), retry.
-                    pct = errored / succeeded
-                    if pct < 0.2:
-                        remaining.put(doc)
-                    else:
-                        sys.stdout.write(f'{round(pct * 100,1)}% of documents failed, not retrying "{doc}"...\n')
-                
+            # If under threshold (and thus likely going smoothly), retry.
+            pct = errored / succeeded
+            if pct < 0.2:
+                remaining.put(doc)
+            else:
+                sys.stdout.write(f'{round(pct * 100,1)}% of documents failed, not retrying "{doc}"...\n')
+                sys.stdout.write(f'Error: {ex}')
+            
     return True
 
 def main():
@@ -113,10 +118,6 @@ def main():
     # Make output directory.
     Path(args.output_path).mkdir(parents=True, exist_ok=True)
 
-    # Get gRPC clients.
-    clients = get_clients(args)
-    opennlp_client = OpenNLPClient()
-
     # Load documents
     if os.path.isfile(args.file_or_dir):
         files = [ args.file_or_dir ]
@@ -124,26 +125,31 @@ def main():
         files = [ f'{args.file_or_dir}{os.path.sep}{f}' for f in os.listdir(args.file_or_dir) if Path(f).suffix == '.txt' ]
         sys.stdout.write(f"Found {len(files)} text files in '{args.file_or_dir}'...\n")
     
-    # Process 
+    # Get and open gRPC channels.
+    channels = get_channels(args)
+    opennlp_channel = OpenNLPChannel()
+    opennlp_channel.open()
+    for channel in channels:
+        channel.open()
+
+    # Process multithread.
     remaining = Queue()
     completed = Queue()
-    processes = []
+    threads = []
 
     for f in files:
         remaining.put(f)
-
     for w in range(args.threads):
-        p = Process(target=do_job, args=(remaining, completed, opennlp_client, clients, args.output_path))
-        processes.append(p)
-        p.start()
+        t = threading.Thread(target=do_job, args=(remaining, completed, args, opennlp_channel, channels, w))
+        threads.append(t)
+        t.start()
+    for t in threads:
+        t.join()
 
-    for p in processes:
-        p.join()
-    
-    # Close all gRPC clients.
-    opennlp_client.close()
-    for client in clients:
-        client.close()
+    # Close all gRPC channels.
+    opennlp_channel.close()
+    for channel in channels:
+        channel.close()
             
     print(f"All done! Results written to '{args.output_path}'\n") 
 
