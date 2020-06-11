@@ -2,19 +2,25 @@ import grpc
 from proto.python.CovidParser_pb2 import Sentence, SentenceDetectionInput, SentenceDetectionOutput
 from proto.python.CovidParser_pb2_grpc import OpenNLPStub
 
-class OpenNLPClient():
+class OpenNLPChannel():
     def __init__(self):
         self.name    = 'open-nlp'
         self.host    = '0.0.0.0'
-        self.port    = '42400'
-        self.open()
+        self.port    = '42401'
 
     def open(self):
         self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
-        self.stub = OpenNLPStub(self.channel)
-    
+
     def close(self):
         self.channel.close()
+
+    def generate_client(self):
+        return OpenNLPClient(self.channel)
+
+class OpenNLPClient():
+    def __init__(self, channel):
+        self.name = 'open-nlp'
+        self.stub = OpenNLPStub(channel)
 
     def process(self, doc_id, text):
         response = self.stub.DetectSentences(SentenceDetectionInput(id=doc_id, text=text))

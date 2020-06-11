@@ -3,8 +3,10 @@ services:
     open-nlp:
         build:
             context: open-nlp/
+        environment:
+            - OPENNLP_PORT=${OPENNLP_PORT}
         ports:
-            - '42400:8080'
+            - ${OPENNLP_PORT}:${OPENNLP_PORT}
         networks:
             default:
                 aliases:
@@ -12,8 +14,10 @@ services:
     assertion-classifier:
         build:
             context: assertion-classifier/
+        environment:
+            - ASRTCLA_PORT=${ASRTCLA_PORT}
         ports:
-            - '42401:8080'
+            - ${ASRTCLA_PORT}:${ASRTCLA_PORT}
         networks:
             default:
                 aliases:
@@ -21,8 +25,11 @@ services:
     metamap:
         build:
             context: metamap/
+        environment: 
+            - METAMAP_PORT=${METAMAP_PORT}
+            - ASRTCLA_PORT=${ASRTCLA_PORT}
         ports:
-            - '42402:8080'
+            - ${METAMAP_PORT}:${METAMAP_PORT}
         networks:
             default:
                 aliases:

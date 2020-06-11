@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.javatuples.Pair;
 
+import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierChannelManager;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapInput;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapOutput;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapSentence;
@@ -16,7 +17,11 @@ import io.grpc.stub.StreamObserver;
  */
 public class MetaMapImpl extends MetaMapImplBase {
 
-    DocumentProcessor processor = new DocumentProcessor();
+    DocumentProcessor processor;
+
+    public MetaMapImpl(AssertionClassifierChannelManager assertionClassifierChannelManager) {
+        this.processor = new DocumentProcessor(assertionClassifierChannelManager);
+    }
 
     @Override
     public void extractNamedEntities(MetaMapInput request, StreamObserver<MetaMapOutput> responseObserver) {

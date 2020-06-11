@@ -6,7 +6,7 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-      Server server = ServerBuilder.forPort(8080)
+      Server server = ServerBuilder.forPort(Integer.parseInt(System.getenv("OPENNLP_PORT")))
         .addService(new OpenNLPImpl())
         .build();
 

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="1" failures="0" name="edu.uw.bhi.bionlp.covid.parser.AppTest" time="0.002" errors="0" skipped="0">
+<testsuite tests="1" failures="0" name="edu.uw.bhi.bionlp.covid.parser.AppTest" time="0.001" errors="0" skipped="0">
   <properties>
-    <property name="os.detected.version" value="5.3"/>
+    <property name="os.detected.version" value="5.4"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64"/>
-    <property name="java.vm.version" value="25.242-b08"/>
+    <property name="java.vm.version" value="25.252-b09"/>
     <property name="java.vm.vendor" value="Private Build"/>
     <property name="maven.multiModuleProjectDirectory" value="/home/nic/work/covid-parser/assertion-classifier"/>
     <property name="java.vendor.url" value="http://java.oracle.com/"/>
-    <property name="os.detected.version.minor" value="3"/>
+    <property name="os.detected.version.minor" value="4"/>
     <property name="path.separator" value=":"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
@@ -19,12 +19,12 @@
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="user.dir" value="/home/nic/work/covid-parser/assertion-classifier"/>
     <property name="os.detected.release.like.debian" value="true"/>
-    <property name="java.runtime.version" value="1.8.0_242-8u242-b08-0ubuntu3~19.10-b08"/>
+    <property name="java.runtime.version" value="1.8.0_252-8u252-b09-1ubuntu1-b09"/>
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
     <property name="java.endorsed.dirs" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/endorsed"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.io.tmpdir" value="/tmp"/>
-    <property name="os.detected.release.version" value="19.10"/>
+    <property name="os.detected.release.version" value="20.04"/>
     <property name="line.separator" value="
 "/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
@@ -40,7 +40,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="os.detected.name" value="linux"/>
-    <property name="os.version" value="5.3.0-45-generic"/>
+    <property name="os.version" value="5.4.0-33-generic"/>
     <property name="library.jansi.path" value="/usr/share/maven/lib/jansi-native"/>
     <property name="user.home" value="/home/nic"/>
     <property name="user.timezone" value="America/Los_Angeles"/>
@@ -59,7 +59,7 @@
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
     <property name="java.vm.info" value="mixed mode"/>
     <property name="os.detected.release.like.ubuntu" value="true"/>
-    <property name="java.version" value="1.8.0_242"/>
+    <property name="java.version" value="1.8.0_252"/>
     <property name="java.ext.dirs" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext:/usr/java/packages/lib/ext"/>
     <property name="securerandom.source" value="file:/dev/./urandom"/>
     <property name="sun.boot.class.path" value="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/resources.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jsse.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/charsets.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jfr.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/classes"/>
@@ -72,5 +72,5 @@
     <property name="sun.desktop" value="gnome"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="edu.uw.bhi.bionlp.covid.parser.AppTest" name="testApp" time="0.002"/>
+  <testcase classname="edu.uw.bhi.bionlp.covid.parser.AppTest" name="testApp" time="0.001"/>
 </testsuite>
