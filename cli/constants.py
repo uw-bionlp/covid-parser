@@ -1,0 +1,7 @@
+APP_NAME = 'covid-parser'
+ENV_ASRTCLA_PORT = 'ASRTCLA_PORT'
+ENV_OPENNLP_PORT = 'OPENNLP_PORT'
+ENV_METAMAP_PORT = 'METAMAP_PORT'
+ASSERTION_CLASSIFIER = 'assertion-classifier'
+OPEN_NLP = 'open-nlp'
+METAMAP = 'metamap'

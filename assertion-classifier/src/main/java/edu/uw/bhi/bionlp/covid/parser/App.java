@@ -6,15 +6,12 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
-      Server server = ServerBuilder.forPort(Integer.parseInt(System.getenv("ASRTCLA_PORT")))
+      Server server = ServerBuilder.forPort(8080)
         .addService(new AssertionClassifierImpl())
         .build();
 
       // Start the server
       server.start();
-
-      // Server threads are running in the background.
-      System.out.println("Assertion Classifier is up!");
 
       // Don't exit the main thread. Wait until server is terminated.
       server.awaitTermination();
