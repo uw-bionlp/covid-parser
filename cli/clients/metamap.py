@@ -7,7 +7,7 @@ from proto.python.CovidParser_pb2_grpc import MetaMapStub
 def get_metamap_containers():
     return [ container for key, container in get_containers().items() if METAMAP in container.name ]
 
-class MetaMapChannel():
+class MetaMapChannelManager():
     def __init__(self, container):
         self.name = METAMAP
         self.host = container.host
@@ -24,8 +24,9 @@ class MetaMapChannel():
 
 class MetaMapClient():
     def __init__(self, channel, args):
-        self.name = METAMAP
-        self.stub = MetaMapStub(channel)
+        self.name           = METAMAP
+        self.stub           = MetaMapStub(channel)
+        self.channel        = channel
         self.semantic_types = args.metamap_semantic_types
 
     def process(self, doc):
