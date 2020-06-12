@@ -1,12 +1,17 @@
 import grpc
+from cli.utils import get_containers
+from cli.constants import METAMAP
 from proto.python.CovidParser_pb2 import MetaMapInput, MetaMapOutput
 from proto.python.CovidParser_pb2_grpc import MetaMapStub
 
+def get_metamap_containers():
+    return [ container for key, container in get_containers().items() if METAMAP in container.name ]
+
 class MetaMapChannel():
-    def __init__(self):
-        self.name    = 'metamap'
-        self.host    = '0.0.0.0'
-        self.port    = '42402'
+    def __init__(self, container):
+        self.name = METAMAP
+        self.host = container.host
+        self.port = container.port
 
     def open(self):
         self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
@@ -19,11 +24,12 @@ class MetaMapChannel():
 
 class MetaMapClient():
     def __init__(self, channel, args):
-        self.name = 'metamap'
+        self.name = METAMAP
         self.stub = MetaMapStub(channel)
         self.semantic_types = args.metamap_semantic_types
 
     def process(self, doc):
+        assertion_cache = {}
         response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_types))
         return response
 
@@ -71,3 +77,4 @@ class MetaMapClient():
                 brat_rows.append(row)
                 t += 1
         return brat_rows
+

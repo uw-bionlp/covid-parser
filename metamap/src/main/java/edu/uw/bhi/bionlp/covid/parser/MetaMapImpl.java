@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.javatuples.Pair;
 
-import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierChannelManager;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapInput;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapOutput;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapSentence;
@@ -19,8 +18,8 @@ public class MetaMapImpl extends MetaMapImplBase {
 
     DocumentProcessor processor;
 
-    public MetaMapImpl(AssertionClassifierChannelManager assertionClassifierChannelManager) {
-        this.processor = new DocumentProcessor(assertionClassifierChannelManager);
+    public MetaMapImpl() {
+        this.processor = new DocumentProcessor();
     }
 
     @Override

@@ -1,12 +1,17 @@
 import grpc
+from cli.utils import get_containers, get_env_var
+from cli.constants import OPEN_NLP, ENV_OPENNLP_PORT
 from proto.python.CovidParser_pb2 import Sentence, SentenceDetectionInput, SentenceDetectionOutput
 from proto.python.CovidParser_pb2_grpc import OpenNLPStub
 
+def get_opennlp_containers():
+    return [ container for key, container in get_containers().items() if OPEN_NLP in container.name ]
+
 class OpenNLPChannel():
     def __init__(self):
-        self.name    = 'open-nlp'
+        self.name    = OPEN_NLP
         self.host    = '0.0.0.0'
-        self.port    = '42401'
+        self.port    = get_env_var(ENV_OPENNLP_PORT)
 
     def open(self):
         self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
@@ -19,7 +24,7 @@ class OpenNLPChannel():
 
 class OpenNLPClient():
     def __init__(self, channel):
-        self.name = 'open-nlp'
+        self.name = OPEN_NLP
         self.stub = OpenNLPStub(channel)
 
     def process(self, doc_id, text):

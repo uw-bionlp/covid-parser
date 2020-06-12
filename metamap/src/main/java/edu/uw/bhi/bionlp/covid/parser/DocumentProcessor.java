@@ -11,8 +11,6 @@ import java.util.HashSet;
 
 import org.javatuples.Pair;
 
-import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierChannelManager;
-import edu.uw.bhi.bionlp.covid.parser.grpcclient.AssertionClassifierChannelManager.AssertionClassifierClient;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapConcept;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.MetaMapSentence;
 import edu.uw.bhi.bionlp.covid.parser.CovidParser.Sentence;
@@ -22,22 +20,18 @@ import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
 
 public class DocumentProcessor {
 
+    AssertionClassifier assertionClassifier = new AssertionClassifier();
     MetamapLiteParser parser = new MetamapLiteParser();
-    AssertionClassifierClient assertionClassifier;
     MetaMapConcept.Builder conceptBuilder = MetaMapConcept.newBuilder();
     HashSet<String> allSemanticTypes = loadSemanticTypes();
-
-    public DocumentProcessor(AssertionClassifierChannelManager assertionClassifierManager) {
-        this.assertionClassifier = assertionClassifierManager.generateClient();
-    }
 
     public Pair<List<MetaMapSentence>, List<String>> processDocument(List<Sentence> sentences, List<String> semanticTypesOfInterest) {
         /**
          * Initialize lists.
          */
-        HashMap<String,String> assertionCache = new HashMap<String,String>();
         List<MetaMapSentence> mmSentences = new ArrayList<MetaMapSentence>();
         List<String> errors = new ArrayList<String>();
+        HashMap<String,String> assertionCache = new HashMap<String,String>();
         
         HashSet<String> semanticTypes = semanticTypesOfInterest == null || semanticTypesOfInterest.size() == 0
             ? allSemanticTypes
@@ -62,10 +56,10 @@ public class DocumentProcessor {
                 errors.add(errorMsg);
             }
 
-            /* 
-             * For each concept, if indexes valid, predict assertion, defaulting to 'present'.
+            /*
+             * For each concept.
              */
-		    for (UMLSConcept concept : concepts) {
+            for (UMLSConcept concept : concepts) {
                 String prediction = "present";
                 try {
 
@@ -81,7 +75,7 @@ public class DocumentProcessor {
                      * Else predict assertion.
                      */
                     } else {
-                        prediction = this.assertionClassifier.predictAssertion(sentence.getText(), concept.getBeginCharIndex(), concept.getEndCharIndex());
+                        prediction = this.assertionClassifier.predict(sentence.getText(), concept.getBeginCharIndex(), concept.getEndCharIndex());
                         assertionCache.put(inputs, prediction);
                     }
                 } catch (Exception ex) {
