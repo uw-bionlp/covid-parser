@@ -1,4 +1,5 @@
 FROM maven:3.5-jdk-8 AS build
+LABEL stage=builder
 
 # Copy deps and source over
 COPY pom.xml /usr/src/app/  

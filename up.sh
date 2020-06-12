@@ -19,14 +19,19 @@ def run(name, img_name, bind_port_to):
     run_shell_cmd(cmd, True)
 
 def wait_till_up(name):
+    wait_cnt = 0
     wait_seconds = 2
     time.sleep(wait_seconds)
     up = False
     while not up:
-        container = get_containers()[name]
-        up = container.up
+        container = get_containers().get(name)
+        up = container.up if container else False
         if not up:
             time.sleep(wait_seconds)
+            wait_cnt += 1
+            if wait_cnt >= 10:
+                sys.stdout.write(f'The container {name} is still not up after {wait_cnt * 10} seconds. Is something wrong?')
+                sys.exit()
 
 def main():
     images = get_images()

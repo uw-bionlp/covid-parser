@@ -11,9 +11,9 @@ from time import localtime, strftime
 from multiprocessing.dummy import Process, Queue, current_process
 import threading
 
-from cli.clients.metamap import MetaMapChannel, get_metamap_containers
-from cli.clients.opennlp import OpenNLPChannel
-from cli.clients.assertion_classifier import AssertionClassifierChannel
+from cli.clients.metamap import MetaMapChannelManager, get_metamap_containers
+from cli.clients.opennlp import OpenNLPChannelManager
+from cli.clients.assertion_classifier import AssertionClassifierChannelManager
 
 def parse_args():
     parser = ArgumentParser()
@@ -55,7 +55,7 @@ def get_channels(args, assertc_channel):
             cnt = f'only {mm_cnt}' if mm_cnt > 0 else 'no'
             sys.stdout.write(f'Error: {args.threads} MetaMap threads requested but {cnt} available. Exiting...\n')
             sys.exit()
-        return [ MetaMapChannel(container) for container in metamap_containers[:args.threads] ]
+        return [ MetaMapChannelManager(container) for container in metamap_containers[:args.threads] ]
 
     # If BRAT
     if args.brat:
@@ -137,9 +137,9 @@ def main():
         sys.stdout.write(f"Found {len(files)} text files in '{args.file_or_dir}'...\n")
 
     # Get and open gRPC channels.
-    opennlp_channel = OpenNLPChannel()
+    opennlp_channel = OpenNLPChannelManager()
     opennlp_channel.open()
-    assertc_channel = AssertionClassifierChannel()
+    assertc_channel = AssertionClassifierChannelManager()
     assertc_channel.open()
     channels = get_channels(args, assertc_channel)
     for channel in channels:
@@ -152,10 +152,16 @@ def main():
 
     for f in files:
         remaining.put(f)
-    for w in range(args.threads):
-        t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, channels, w))
-        threads.append(t)
-        t.start()
+    if args.metamap:
+        for w,channel in enumerate(channels):
+            t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, [ channel ], w))
+            threads.append(t)
+            t.start()
+    else:   
+        for w in range(args.threads):
+            t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, channels, w))
+            threads.append(t)
+            t.start()
     for t in threads:
         t.join()
 

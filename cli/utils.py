@@ -15,9 +15,16 @@ class Container:
         self.id   = splt[0].strip()
         self.img  = splt[1].strip()
         self.name = splt[-1].strip()
-        self.up   = 'Up ' in splt[4]
-        self.host = splt[5].split('->')[0].split(':')[0].strip()
-        self.port = splt[5].split('->')[0].split(':')[1].strip()
+
+        full_data = len(splt) == 7
+        if full_data:
+            self.up   = 'Up ' in splt[4]
+            self.host = splt[5].split('->')[0].split(':')[0].strip()
+            self.port = splt[5].split('->')[0].split(':')[1].strip()
+        else:
+            self.up   = False
+            self.host = ''
+            self.port = ''
 
 def get_images():
     runtime = get_container_runtime()
