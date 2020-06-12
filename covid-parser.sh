@@ -44,7 +44,7 @@ def write_output(output, output_path):
     with open(f'{output_path}{os.path.sep}{filename}.json', 'w') as f:
         json.dump(output, f, ensure_ascii=False, indent=4)
 
-def get_channels(args, assertc_channel):
+def get_channels(args):
     channels = []
 
     # If Metamap
@@ -139,9 +139,7 @@ def main():
     # Get and open gRPC channels.
     opennlp_channel = OpenNLPChannelManager()
     opennlp_channel.open()
-    assertc_channel = AssertionClassifierChannelManager()
-    assertc_channel.open()
-    channels = get_channels(args, assertc_channel)
+    channels = get_channels(args)
     for channel in channels:
         channel.open()
 
@@ -167,7 +165,6 @@ def main():
 
     # Close all gRPC channels.
     opennlp_channel.close()
-    assertc_channel.close()
     for channel in channels:
         channel.close()
             
