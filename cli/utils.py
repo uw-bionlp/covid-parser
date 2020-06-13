@@ -29,7 +29,7 @@ class Container:
 def get_images():
     runtime = get_container_runtime()
     output = run_shell_cmd(f'{runtime} images')
-    images = [ ContainerImage(img) for img in str(output).split('\\n') if img.strip().startswith(APP_NAME) ]
+    images = [ ContainerImage(img) for img in str(output).split('\\n') if APP_NAME in img ]
     return { img.name : img for img in images }
 
 def get_containers():
