@@ -146,10 +146,26 @@ def main():
     # Process multithread.
     remaining = Queue()
     completed = Queue()
-    threads = []
 
     for f in files:
         remaining.put(f)
+
+    processes = []
+    if args.metamap:
+        for w,channel in enumerate(channels):
+            p = Process(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, [ channel ], w))
+            processes.append(p)
+            p.start()
+    else:   
+        for w in range(args.threads):
+            p = Process(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, channels, w))
+            processes.append(p)
+            p.start()
+    for p in processes:
+        p.join()
+
+    '''
+    threads = []
     if args.metamap:
         for w,channel in enumerate(channels):
             t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, [ channel ], w))
@@ -162,6 +178,7 @@ def main():
             t.start()
     for t in threads:
         t.join()
+    '''
 
     # Close all gRPC channels.
     opennlp_channel.close()

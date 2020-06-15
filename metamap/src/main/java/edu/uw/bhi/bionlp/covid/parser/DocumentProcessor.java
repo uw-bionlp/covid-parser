@@ -3,6 +3,8 @@ package edu.uw.bhi.bionlp.covid.parser;
 import java.util.List;
 import java.io.File;
 import java.nio.file.Files;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,7 +22,6 @@ import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
 
 public class DocumentProcessor {
 
-    AssertionClassifier assertionClassifier = new AssertionClassifier();
     MetamapLiteParser parser = new MetamapLiteParser();
     MetaMapConcept.Builder conceptBuilder = MetaMapConcept.newBuilder();
     HashSet<String> allSemanticTypes = loadSemanticTypes();
@@ -43,16 +44,16 @@ public class DocumentProcessor {
         for (int sId = 0; sId < sentences.size(); sId++) {
             List<MetaMapConcept> mmCons = new ArrayList<MetaMapConcept>();
             Sentence sentence = sentences.get(sId);
+            String normalized = Normalizer.normalize(sentence.getText(), Form.NFKC);
 
             /* 
              * Extract UMLS concepts.
              */
             List<UMLSConcept> concepts = new ArrayList<UMLSConcept>();
             try {
-                concepts = parser.parseSentenceWithMetamap(sentence.getText(), semanticTypes);
+                concepts = parser.parseSentenceWithMetamap(normalized, semanticTypes);
             } catch (Exception ex) {
-                String errorMsg = "Error: failed to parse with Metamap. Sentence: " + sId + " '" + sentence.getText() + "'. " + ex.getMessage();
-                System.out.println(errorMsg);
+                String errorMsg = "Error: failed to parse with Metamap. Sentence" + sId + ": '" + normalized + "'. Error: " + ex.getMessage();
                 errors.add(errorMsg);
             }
 
@@ -62,26 +63,30 @@ public class DocumentProcessor {
             for (UMLSConcept concept : concepts) {
                 String prediction = "present";
                 try {
-
+                    
                     /*
                      * Check if this span has been seen before, if so use cached 
                      * rather than re-checking assertion.
                      */ 
-                    String inputs = concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
-                    if (assertionCache.containsKey(inputs)) {
-                        prediction = assertionCache.get(inputs);
+                    // String inputs = concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
+                    // if (assertionCache.containsKey(inputs)) {
+                    //    prediction = assertionCache.get(inputs);
 
                     /*
                      * Else predict assertion.
                      */
-                    } else {
-                        prediction = this.assertionClassifier.predict(sentence.getText(), concept.getBeginCharIndex(), concept.getEndCharIndex());
-                        assertionCache.put(inputs, prediction);
-                    }
+                    //} else {
+                    //    Pair<String,String> predicted = assertionClassifier.predict(normalized, concept.getBeginCharIndex(), concept.getEndCharIndex());
+                    //    prediction = predicted.getValue0();
+//
+                    //    if (predicted.getValue1() != null) {
+                    //        errors.add(predicted.getValue1());
+                    //    } else {
+                    //        assertionCache.put(inputs, prediction);
+                    //    }
+                    //}
                 } catch (Exception ex) {
-                    String errorMsg = "Error: failed to predict concept. Sentence: " + sId + ", Concept: '" + concept.getConceptName() + "'. " + ex.getMessage();
-                    System.out.println(errorMsg);
-                    errors.add(errorMsg);
+                    // do nothing, error caught above
 
                 /*
                  * Add the final concept.

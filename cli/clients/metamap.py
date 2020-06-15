@@ -35,7 +35,7 @@ class MetaMapClient():
         return response
 
     def to_dict(self, response):
-        output = { 'id': response.id, 'sentences': [] }
+        output = { 'id': response.id, 'sentences': [], 'errors': [ err for err in response.errors] }
         for sent in response.sentences:
             sentence = { 
                 'id': sent.id, 
@@ -64,6 +64,7 @@ class MetaMapClient():
         if len(base_json['sentences']) != len(client_json['sentences']):
             print(f"{self.name} sentence count doesn't match input sentence count! Skipping result merge.")
 
+        base_json['errors'] = client_json['errors']
         for i,sentence in enumerate(base_json['sentences']):
             sentence[self.name] = client_json['sentences'][i]['concepts']
 
