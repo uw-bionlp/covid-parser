@@ -40,15 +40,15 @@ def main():
     mmlite_inst_cnt = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 1
 
     # Assertion Classifier
-    cont_name = f'{APP_NAME}_{ASSERTION_CLASSIFIER}_1'
-    img_name = f'{APP_NAME}_{ASSERTION_CLASSIFIER}'
-    port = env_vars[ENV_ASRTCLA_PORT]
+    # cont_name = f'{APP_NAME}_{ASSERTION_CLASSIFIER}_1'
+    # img_name = f'{APP_NAME}_{ASSERTION_CLASSIFIER}'
+    # port = env_vars[ENV_ASRTCLA_PORT]
 
-    if not images.get(img_name):
-        build(img_name, ASSERTION_CLASSIFIER)
-    if not any([ x for x in containers if cont_name in x.name ]):
-        run(cont_name, img_name, port)
-        wait_till_up(cont_name)
+    # if not images.get(img_name):
+    #     build(img_name, ASSERTION_CLASSIFIER)
+    # if not any([ x for x in containers if cont_name in x.name ]):
+    #     run(cont_name, img_name, port)
+    #     wait_till_up(cont_name)
 
     # Open-NLP
     cont_name = f'{APP_NAME}_{OPEN_NLP}_1'
@@ -74,6 +74,10 @@ def main():
             run(cont_name, img_name, port)
             wait_till_up(cont_name)
         port += 1
+
+    # Clear dangling PIDs
+    cmd = "ps x | grep './up.sh' | awk '{print $1}' | xargs kill -9"
+    run_shell_cmd(cmd)
 
 if __name__ == '__main__':
     main()

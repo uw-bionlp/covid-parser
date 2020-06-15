@@ -1,7 +1,10 @@
 package edu.uw.bhi.bionlp.covid.parser;
 
+import java.io.File;
+
 import edu.uw.bhi.uwassert.AssertionClassification;
 import name.adibejan.util.IntPair;
+import org.javatuples.Pair;
 
 /**
  *
@@ -17,13 +20,38 @@ public class AssertionClassifier {
                     "resources/assertion-classifier/liblinear-1.93");
     }
 
-    String predict (String sentence, int startIndex, int endIndex) {
+    public AssertionClassifier() {
+        clearFeatureCache();
+    }
+
+    Pair<String,String> predict (String sentence, int startIndex, int endIndex) {
+        String prediction = "indeterminate";
+        String ngram = "";
+        
         try {
             NgramParameters params = getNgram(sentence, 5, startIndex, endIndex);
-            return AssertionClassification.predictMP(params.ngram, new IntPair(params.beginTokenIndex, params.endTokenIndex));  
+            ngram = params.ngram;
+            prediction = AssertionClassification.predictMP(ngram, new IntPair(params.beginTokenIndex, params.endTokenIndex));  
+            return new Pair<String,String>(prediction, null);
         } catch (Exception ex) {
-            System.out.println("Error: failed to assert. Sentence: '" + sentence + "', StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". " + ex.getMessage());
-            return "present";
+            String err = "Error: failed to assert. NGram: " + ngram + ", StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". Error: " + ex.getMessage();
+            clearFeatureCache();
+            return new Pair<String,String>(prediction, err);
+        }
+    }
+
+    void clearFeatureCache() {
+        File[] files = new File("resources/assertion-classifier/features").listFiles();
+        for (int i = 0; i < files.length; i++) {
+            File file = files[i];
+            String name = file.getName();
+            if (name.startsWith("runtext.feat_") || name.startsWith("runtext.predict_")) {
+                try {
+                    file.delete();
+                } catch (Exception ex) {
+                    // do nothing  
+                }
+            }
         }
     }
 
@@ -68,7 +96,7 @@ public class AssertionClassifier {
         }
 
         return new NgramParameters(
-            sent.substring(startPos, endPos).trim(), 
+            sent.substring(startPos, endPos).trim(),
             precCnt, 
             precCnt + sent.substring(beginCharIndex, endCharIndex).split(" ").length-1
         );
@@ -85,4 +113,4 @@ class NgramParameters {
         this.beginTokenIndex = beginTokenIndex;
         this.endTokenIndex = endTokenIndex;
     }
-}
+}              
