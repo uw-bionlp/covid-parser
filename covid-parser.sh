@@ -15,6 +15,8 @@ from cli.clients.metamap import MetaMapChannelManager, get_metamap_containers
 from cli.clients.opennlp import OpenNLPChannelManager
 from cli.clients.assertion_classifier import AssertionClassifierChannelManager
 
+lck = threading.Lock()
+
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument('file_or_dir', help='Absolute or relative path to the file or directory to parse.')
@@ -69,9 +71,12 @@ def process_doc(filepath, opennlp_client, clients, output_path):
         text = f.read()
         doc_id = Path(filepath).stem
 
-    # Get base sentences.
+    # Get base sentences, locking opennlp between threads.
+    global lck
+    lck.acquire()
     doc = opennlp_client.process(doc_id, text)
     json = opennlp_client.to_dict(doc)
+    lck.release()
 
     # For each gRPC client, process file.
     for client in clients:
