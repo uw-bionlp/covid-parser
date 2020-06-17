@@ -22,6 +22,7 @@ import edu.uw.bhi.bionlp.covid.parser.metamap.MetamapLiteParser;
 
 public class DocumentProcessor {
 
+    AssertionClassifier assertionClassifier = new AssertionClassifier();
     MetamapLiteParser parser = new MetamapLiteParser();
     MetaMapConcept.Builder conceptBuilder = MetaMapConcept.newBuilder();
     HashSet<String> allSemanticTypes = loadSemanticTypes();
@@ -32,7 +33,6 @@ public class DocumentProcessor {
          */
         List<MetaMapSentence> mmSentences = new ArrayList<MetaMapSentence>();
         List<String> errors = new ArrayList<String>();
-        HashMap<String,String> assertionCache = new HashMap<String,String>();
         
         HashSet<String> semanticTypes = semanticTypesOfInterest == null || semanticTypesOfInterest.size() == 0
             ? allSemanticTypes
@@ -45,6 +45,7 @@ public class DocumentProcessor {
             List<MetaMapConcept> mmCons = new ArrayList<MetaMapConcept>();
             Sentence sentence = sentences.get(sId);
             String normalized = Normalizer.normalize(sentence.getText(), Form.NFKC);
+            HashMap<String,String> assertionCache = new HashMap<String,String>();
 
             /* 
              * Extract UMLS concepts.
@@ -68,23 +69,23 @@ public class DocumentProcessor {
                      * Check if this span has been seen before, if so use cached 
                      * rather than re-checking assertion.
                      */ 
-                    // String inputs = concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
-                    // if (assertionCache.containsKey(inputs)) {
-                    //    prediction = assertionCache.get(inputs);
+                    String inputs = concept.getBeginCharIndex() + "|" + concept.getEndCharIndex();
+                    if (assertionCache.containsKey(inputs)) {
+                        prediction = assertionCache.get(inputs);
 
                     /*
                      * Else predict assertion.
                      */
-                    //} else {
-                    //    Pair<String,String> predicted = assertionClassifier.predict(normalized, concept.getBeginCharIndex(), concept.getEndCharIndex());
-                    //    prediction = predicted.getValue0();
-//
-                    //    if (predicted.getValue1() != null) {
-                    //        errors.add(predicted.getValue1());
-                    //    } else {
-                    //        assertionCache.put(inputs, prediction);
-                    //    }
-                    //}
+                    } else {
+                        Pair<String,String> predicted = assertionClassifier.predict(normalized, concept.getBeginCharIndex(), concept.getEndCharIndex());
+                        prediction = predicted.getValue0();
+
+                        if (predicted.getValue1() != null) {
+                            errors.add(predicted.getValue1());
+                        } else {
+                            assertionCache.put(inputs, prediction);
+                        }
+                    }
                 } catch (Exception ex) {
                     // do nothing, error caught above
 
@@ -112,7 +113,7 @@ public class DocumentProcessor {
                 .setBeginCharIndex(sentence.getBeginCharIndex())
                 .setEndCharIndex(sentence.getEndCharIndex())
                 .addAllConcepts(mmCons)
-                .setId(sId)
+                .setId(sentence.getId())
                 .setText(sentence.getText())
                 .build();
             mmSentences.add(mmSent);

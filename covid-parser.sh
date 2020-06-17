@@ -15,7 +15,9 @@ from cli.clients.metamap import MetaMapChannelManager, get_metamap_containers
 from cli.clients.opennlp import OpenNLPChannelManager
 from cli.clients.assertion_classifier import AssertionClassifierChannelManager
 
+""" Globals """
 lck = threading.Lock()
+
 
 def parse_args():
     parser = ArgumentParser()
