@@ -1113,13 +1113,6 @@ class EventExtractor(nn.Module):
         '''
         Train multitask model
         '''
-        
-        logging.info('')
-        logging.info('='*72)
-        logging.info('='*72)
-        logging.info("Event extractor model - predict")
-        logging.info('='*72)
-        logging.info('='*72)
 
         device = get_device(device)
         self.to(device)
