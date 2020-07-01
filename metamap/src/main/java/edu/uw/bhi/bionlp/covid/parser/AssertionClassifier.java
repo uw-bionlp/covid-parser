@@ -20,38 +20,19 @@ public class AssertionClassifier {
                     "resources/assertion-classifier/liblinear-1.93");
     }
 
-    public AssertionClassifier() {
-        clearFeatureCache();
-    }
-
     Pair<String,String> predict (String sentence, int startIndex, int endIndex) {
         String prediction = "indeterminate";
         String ngram = "";
+        int size = 10;
         
         try {
-            NgramParameters params = getNgram(sentence, 5, startIndex, endIndex);
+            NgramParameters params = getNgram(sentence, size, startIndex, endIndex);
             ngram = params.ngram;
-            prediction = AssertionClassification.predictMP(ngram, new IntPair(params.beginTokenIndex, params.endTokenIndex));  
+            prediction = AssertionClassification.predict(ngram, new IntPair(params.beginTokenIndex, params.endTokenIndex));  
             return new Pair<String,String>(prediction, null);
         } catch (Exception ex) {
-            String err = "Error: failed to assert. NGram: " + ngram + ", StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". Error: " + ex.getMessage();
-            clearFeatureCache();
+            String err = "Error: failed to assert. NGram: '" + ngram + "', StartIndex: " + startIndex + ", EndIndex: " + endIndex + ". Error: '" + ex.getMessage() + "'";
             return new Pair<String,String>(prediction, err);
-        }
-    }
-
-    void clearFeatureCache() {
-        File[] files = new File("resources/assertion-classifier/features").listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
-            String name = file.getName();
-            if (name.startsWith("runtext.feat_") || name.startsWith("runtext.predict_")) {
-                try {
-                    file.delete();
-                } catch (Exception ex) {
-                    // do nothing  
-                }
-            }
         }
     }
 

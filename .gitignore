@@ -8,3 +8,4 @@ test/
 .vscode/
 __pycache__/
 *.pyc
+*.tar.gz

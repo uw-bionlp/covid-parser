@@ -4,7 +4,9 @@ from cli.constants import METAMAP
 from proto.python.CovidParser_pb2 import MetaMapInput, MetaMapOutput
 from proto.python.CovidParser_pb2_grpc import MetaMapStub
 from copy import copy
+import threading
 
+lck = threading.Lock()
 sent_cache = {}
 
 def get_metamap_containers():
@@ -36,6 +38,8 @@ class MetaMapClient():
 
         # Check if each sentence seen before
         global sent_cache
+        global lck
+        lck.acquire()
         cache = []
         for sent in doc.sentences:
             h = hash(sent.text)
@@ -45,13 +49,16 @@ class MetaMapClient():
                 cpy.id = sent.id
                 cache.append(cpy)
                 del doc.sentences[sent.id]
+        lck.release()
 
         response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_types))
 
         # Cache newly run sentences
+        lck.acquire()
         for sent in response.sentences:
             h = hash(sent.text)
             sent_cache[h] = sent
+        global lck
         
         # Insert previously cached sentences back in
         for sent in cache:

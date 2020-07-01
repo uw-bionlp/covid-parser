@@ -44,7 +44,7 @@ public class DocumentProcessor {
         for (int sId = 0; sId < sentences.size(); sId++) {
             List<MetaMapConcept> mmCons = new ArrayList<MetaMapConcept>();
             Sentence sentence = sentences.get(sId);
-            String normalized = Normalizer.normalize(sentence.getText(), Form.NFKC);
+            String normalized = Normalizer.normalize(sentence.getText(), Form.NFKC).trim().replaceAll(" +", " ");
             HashMap<String,String> assertionCache = new HashMap<String,String>();
 
             /* 

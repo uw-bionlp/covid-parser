@@ -147,19 +147,16 @@ def main():
     opennlp_channel = OpenNLPChannelManager()
     opennlp_channel.open()
     channels = get_channels(args)
-    for channel in channels:
-        channel.open()
+    for channel in channels: channel.open()
 
     # Process multithread.
     remaining = Queue()
     completed = Queue()
-
-    for f in files:
-        remaining.put(f)
-
     processes = []
+    for f in files: remaining.put(f)
+
     if args.metamap:
-        for w,channel in enumerate(channels):
+        for w, channel in enumerate(channels):
             p = Process(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, [ channel ], w))
             processes.append(p)
             p.start()
@@ -168,24 +165,8 @@ def main():
             p = Process(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, channels, w))
             processes.append(p)
             p.start()
-    for p in processes:
-        p.join()
 
-    '''
-    threads = []
-    if args.metamap:
-        for w,channel in enumerate(channels):
-            t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, [ channel ], w))
-            threads.append(t)
-            t.start()
-    else:   
-        for w in range(args.threads):
-            t = threading.Thread(target=do_subprocess, args=(remaining, completed, args, opennlp_channel, channels, w))
-            threads.append(t)
-            t.start()
-    for t in threads:
-        t.join()
-    '''
+    for p in processes: p.join()
 
     # Close all gRPC channels.
     opennlp_channel.close()

@@ -36,6 +36,7 @@ public class MetamapLiteParser implements IMetamapParser {
             myProperties.setProperty("metamaplite.excluded.termsfile",
                     "resources/public_mm_lite/data/specialterms.txt");
             myProperties.setProperty("metamaplite.detect.negations", "false");
+            myProperties.setProperty("metamaplite.index.directory", "resources/public_mm_lite/data/ivf");
 
             metaMapLiteInst = new MetaMapLite(myProperties);
 

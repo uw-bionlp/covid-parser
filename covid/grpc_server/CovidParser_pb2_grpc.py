@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import CovidParser_pb2 as CovidParser__pb2
+import grpc_server.CovidParser_pb2 as CovidParser__pb2
 
 
 class CovidStub(object):
