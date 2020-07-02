@@ -892,7 +892,6 @@ class EventExtractor(nn.Module):
         torch.set_num_threads(self.num_workers)
 
         # Loop on mini-batches
-        pbar = tqdm(total=int(len(X)/self.batch_size))
         events_by_sent = []
         spans_by_sent = []
         alphas = []
@@ -925,12 +924,7 @@ class EventExtractor(nn.Module):
                         arg_scores = y_pred_bat['arg_scores'],
                         arg_mask = y_pred_bat['arg_mask'],
                         prune_overlapping = self.prune_overlapping,
-                        #overlaps = y_bat['span_overlaps'],
                         verbose = i == 0))
-
-                        
-            pbar.update()
-        pbar.close()
 
         spans_by_doc = dataset.by_doc(spans_by_sent)
         events_by_doc = dataset.by_doc(events_by_sent)

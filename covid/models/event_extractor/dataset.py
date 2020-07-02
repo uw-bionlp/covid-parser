@@ -1020,9 +1020,7 @@ class EventExtractorDataset(Dataset):
                                 # pad_start = self.pad_start, 
                                 # pad_end = self.pad_end,
                                 num_workers = self.num_workers, 
-                                device = self.device,
-                                embedding_model=embedding_model,
-                                tokenizer_model=tokenizer_model)
+                                device = self.device)
 
         assert len(X_) == self.seq_count        
         self.mask = create_mask(self.seq_lengths, self.max_len)   
