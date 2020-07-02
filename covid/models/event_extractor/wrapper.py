@@ -71,6 +71,12 @@ class EventExtractorWrapper(Base):
             descrip = 'Event extractor', 
             ) 
 
+    def predict_sub_op_fast(self, X, embedding_model, tokenizer_model, device, **kwargs):
+        X, y = self.preprocess(X, None)
+        y = self.estimator.predict_fast(X, embedding_model, tokenizer_model, device, **kwargs)
+        _, y = self.postprocess(None, y)
+        
+        return y 
 
     #@Override
     def predict_sub_op(self, X, y=None, pass_true=False, **kwargs):

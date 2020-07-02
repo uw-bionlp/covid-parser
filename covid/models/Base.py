@@ -183,43 +183,21 @@ class Base(object):
 
     def load_pretrained(self, dir_, param_map=None):
     
-        # Hyperparameters
-        logging.info('')
-        logging.info('-'*72)
-        logging.info('Loading pre-trained model...')
-        logging.info('-'*72)
-        
         # Load hyper parameters
         fn = os.path.join(dir_, HYPERPARAMS_FILE)
-        logging.info("Hyper parameters loading from:\t{}".format(fn))
         hp = json.load(open(fn,'r'))
-        
-        # Print hyper parameters
-        logging.info("Hyper parameters loaded:")
-        for param, val in hp.items():
-            logging.info("\t{}:\t{}".format(param, val))
-        logging.info('')
 
         # Map parameters
         if param_map is not None:
-            logging.info('Mapping hyper parameters:')
             for name, val in param_map.items():
-                logging.info('\t{}: orig={},\tnew={}'.format(name, hp[name], val))
                 hp[name] = val
 
         # Incorporate hyper parameters into model
         self.hyperparams = hp
-        logging.info('self.hyperparams updated')
         
         # Load saved estimator
         fn = os.path.join(dir_, STATE_DICT)
-        logging.info("State dict loading from:\t{}".format(fn))
         self.load_state_dict(fn)
-        logging.info("State dict loaded")
-        
-        logging.info('Pre-trained model loaded')
-        logging.info('')
-        logging.info('')
 
 
     def fit_preprocess_X(self, X):
@@ -449,6 +427,16 @@ class Base(object):
 
         return y
 
+    def predict_fast(self, X, embedding_model, tokenizer_model, device=None, **kwargs):
+
+        # Apply mask
+        X_ss = self.apply_mask(X, mask=None)        
+        
+        # Get predictions
+        y_ss = self.predict_sub_op_fast(X_ss, embedding_model, tokenizer_model, device, **kwargs)
+
+        return y_ss
+
     def predict(self, X, mask=None, **kwargs):
         '''
         Predict labels, potentially with masking
@@ -480,18 +468,7 @@ class Base(object):
         
         # Get predictions
         y_prob_ss = self.prob_sub_op(X_ss)
-                
-        ## Get default probability
-        #default_val = self.get_default_prob(y_prob_ss)
-        
-        # Restore/unmask
-        #y_prob_e2e = self.restore_mask( \
-        #                                X_e2e = X, 
-        #                                y_ss = y_prob_ss, 
-        #                                mask = mask,
-        #                                default_val = default_val)
-        x = ss               
-        #return y_prob_e2e 
+
         return y_prob_ss
 
 
@@ -500,12 +477,7 @@ class Base(object):
         params.update(self.hyperparams)
         if self.feat_params is not None:
             params.update(self.feat_params)
-        params.update({'model_type': self.model_type,
-                      'descrip': self.descrip}
-
-        #params.update({'event': self.event, 
-        #              'entity': self.entity}
-
+        params.update({ 'model_type': self.model_type, 'descrip': self.descrip }
         )
         return params
 
@@ -763,24 +735,11 @@ class Base(object):
             assert len(set([len(X_init), len(y_init), len(i_init)]))==1
         assert (embed_pool is None) or (len(embed_pool) == len(X_pool))
 
-        # Get data set sizes
-        logging.info('') 
-        logging.info('Input sizes:')
-        logging.info("Pool size:\t{}".format(len(X_pool)))
-        logging.info("Eval size:\t{}".format(len(X_eval)))
-        logging.info("Initial size:\t{}".format(None if X_init is None else len(X_init)))
-
         # Get next seed
         seed = None if seeds is None else seeds.pop()
             
         # Initial training data not provided, sample from training pool
-        logging.info('')
-        logging.info('Initial batch set up')
         if X_init is None:
-
-            logging.info('Initial training data NOT provided.')
-            logging.info('Sampling initial training data from training pool.')
-            logging.info("Initial training size:\t{}".format(n_init))
 
             # Start with indices for all training data
             idx_pool = list(range(len(X_pool)))
@@ -795,19 +754,11 @@ class Base(object):
         # Initial training data provided
         else:            
             n_init = len(X_init)
-            logging.info('Initial training data provided')
-            logging.info('Overriding provided n_init value')
-            logging.info("Init size:\t{}".format(n_init))
 
         # Get data set sizes
         n_pool = len(X_pool)
         n_eval = len(X_eval) 
-        n_init = len(X_init)     
-        logging.info('') 
-        logging.info('Input sizes after setup:')
-        logging.info("Pool size:\t{}".format(n_pool))
-        logging.info("Eval size:\t{}".format(n_eval))
-        logging.info("Init size:\t{}".format(n_init))
+        n_init = len(X_init) 
 
         # Total training samples
         n_train = n_init + n_pool
@@ -911,31 +862,16 @@ class Base(object):
             df = get_label_dist(y_fit)
             df[ROUND] = i
             dfs_labels.append(df)
-
-            logging.info("")
-            logging.info("="*72)
-            logging.info("Training batch:\t\t{} of {}".format(i+1, n_batches))
-            logging.info("="*72)
-            logging.info("Samples in batch:\t{}".format(len(X_batch)))
-            logging.info("Samples in train:\t{}".format(len(X_fit)))
-            logging.info("Samples in pool:\t{}".format(len(X_pool)))
             
-                    
             # Fit model to batch
-
             # Initial round for initial training
             if (i == 0) and (model_dir_init is not None):
                 self.load_pretrained(dir_=model_dir_init, param_map=param_map)
-                logging.info('')
-                logging.info('Loading initial model')
-                logging.info('')
                 
 
                 fn = os.path.join(path_, 'loaded pre-trained.txt')
                 with open(fn,'w') as f:
                     f.write('Loaded pre-trained model from: {}'.format(model_dir_init))
-
-                
             else:                            
                 self.estimator = self.estimator_class(**hyperparams)
                 self.fit(X_fit, y_fit, mask=None, post_train=False)     
@@ -973,7 +909,6 @@ class Base(object):
             summary = scores.copy()
             for col, val in col_val_filt:
                 summary = summary[summary[col]==val]
-                
                 
             fn = os.path.join(path, 'summary.csv')
             summary.to_csv(fn)

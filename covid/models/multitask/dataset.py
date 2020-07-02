@@ -26,7 +26,7 @@ import math
 from utils.misc import nested_dict_to_list, list_to_nested_dict, dict_to_list
 from utils.seq_prep import preprocess_tokens_doc
 from models.crf import add_bio_labels, BIO_to_span
-from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
+from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check, get_embeddings_preloaded
 from models.utils import pad_embedding_seq, mem_size, pad_sequences, create_mask,  seq_label,  map_1D, map_2D, map_dict_builder
 from corpus.event import Event, Span, events2sent_labs, events2seq_tags
 
@@ -175,6 +175,8 @@ def preprocess_X_xfmr(X, \
                 num_workers = 6,
                 get_last = True,
                 batch_size = 50,
+                embedding_model = None,
+                tokenizer_model = None
                 ):
 
     '''
@@ -186,37 +188,27 @@ def preprocess_X_xfmr(X, \
             e.g.[['Patient', 'denies', 'tobacco', '.'], [...]]
     
     '''    
-
-        
-    logging.info('='*72)
-    logging.info('Preprocessing X')
-    logging.info('='*72)
     
     # Flatten documents into sequence of sentences
     X = [sent for doc in X for sent in doc]
-    logging.info('Document count:\t{}'.format(len(X)))
-    logging.info('Flattened documents to sequence of sentences')
-    logging.info('Sentence count:\t{}'.format(len(X)))
-    
-    logging.info('Encoding input using transformer...')
     
     # Get word pieces
     wp_toks, wp_ids, tok_idx = tokens2wordpiece( \
                             tokens = X, 
                             xfmr_type = xfmr_type, 
                             xfmr_dir = xfmr_dir, 
-                            get_last = get_last)
+                            get_last = get_last,
+                            tokenizer = tokenizer_model)
 
     # Get sequence length, with start and and padding
     seq_lengths = [len(x) for x in tok_idx]
     
-            
     # X as embedding
-    embed = get_embeddings( \
+    embed = get_embeddings_preloaded(embedding_model,
                             word_piece_ids = wp_ids, 
                             tok_idx = tok_idx, 
-                            xfmr_type = xfmr_type, 
-                            xfmr_dir = xfmr_dir, 
+                            #xfmr_type = xfmr_type, 
+                            #xfmr_dir = xfmr_dir, 
                             num_workers = num_workers,
                             batch_size = batch_size,
                             device = device)
@@ -228,15 +220,7 @@ def preprocess_X_xfmr(X, \
     
     # Convert embeddings to tensor
     embed = torch.tensor(embed)
-
-    logging.info('Sequence length min:\t{}'.format(min(seq_lengths)))
-    logging.info('Sequence length max:\t{}'.format(max(seq_lengths)))
-    logging.info('Embedding dimensions:\t{}'.format(embed.shape))
-    logging.info('Embedding memory size:\t{}'.format(mem_size(embed)))
               
-
-    
-    logging.info('')
     return (X, embed, seq_lengths)    
 
 
@@ -606,14 +590,7 @@ class MultitaskDataset(Dataset):
                                         max_len = self.max_len, 
                                         pad_start = self.pad_start,
                                         label_to_id = self.label_to_id)
-       
-
-        logging.info("")
-        logging.info("Multitask Data set")
-        logging.info("Document count:\t{}".format(self.doc_count))
-        logging.info("Sentence count:\t{}".format(self.seq_count))            
-
-
+             
         
     def __len__(self):
         return self.seq_count

@@ -35,9 +35,6 @@ DT = [ \
 
 NOT_SECTIONS = '^[ \t]*(' + '|'.join(DT) + ')[ \t]*:'
 
-# Default heading pattern for target matches any section
-#HEAD_PAT_TARGET = '.'
-
 # Pattern for numbered lists
 
 SOCIAL_PAT = '^[ \t]*((other|past|pertinent)? *(family\/|pertinent)? *(social|soc) *(and)? *(family)? *(history|hx)? *(details)?|shx?|sochx?|habits?)[ \t]*:'
@@ -90,84 +87,9 @@ SECTION_MAP = [ \
     ('^[ \t]*(injuries)[ \t]*:', INJURIES),    
     ('^[ \t]*(issues)[ \t]*:', ISSUES),        
     ('^[ \t]*(constitutional *(symptoms)?)[ \t]*:', CONST),
-
-    
     ]
 
 SECTION_START = 'START'
-
-#def comp_text(text, encoding="ascii"):
-def comp_text(text, encoding=ENCODING):    
-    
-    return  zlib.compress(text.encode(encoding)) 
-
-def decomp_text(text, encoding=ENCODING):
-    return zlib.decompress(text).decode(encoding) 
-
-
-def comp_indices(indices):
-    return zlib.compress(pickle.dumps(indices))
-    
-def decomp_indices(indices):    
-    return pickle.loads(zlib.decompress(indices))
-
-
-
-def normalize_token(tok, norm_pat, norm_map):
-    '''
-    Normalize single token
-    '''
-
-    # Look for normalization pattern
-    match = re.search(norm_pat, tok, flags=re.IGNORECASE)
-    
-    # Normalization pattern found
-    if match:
-        
-        # Loop on normalization mapping until found
-        found = False 
-        for orig, new_ in norm_map:
-
-            # Look for match                                   
-            submatch = re.search(orig, tok, flags=re.IGNORECASE)
-            
-            # Map found
-            if submatch:
-                
-                # Normalize token
-                tok = tok.replace(submatch.group(0), new_)
-                
-                # Flag pattern as found and break
-                found = True 
-                break
-                
-        # Make sure normalization mapping found
-        assert found, "Could not find normalization mapping"    
-
-    return tok
-
-
-def normalize_doc(doc, norm_pat, norm_map):
-    '''
-    Normalize document
-    '''    
-    
-    # Loop on sentences
-    new_doc = []
-    for sent in doc:
-        
-        # Loop on tokens and sentence
-        new_sent = []
-        for tok in sent:
-            
-            # Normalize token and append
-            new_tok = normalize_token(tok, norm_pat, norm_map)
-            new_sent.append(new_tok)
-    
-        new_doc.append(new_sent)
-       
-    return new_doc
-
 
 def wrap_sent(sent, max_seq_len):
 
@@ -192,7 +114,6 @@ def wrap_sentences(doc, max_seq_len):
     Wrap sentences
     '''
      
-    # Loop on tokenized sentences in document
     new_doc = []
     for sent in doc:
         new_doc.extend(wrap_sent(sent, max_seq_len))    
@@ -213,57 +134,12 @@ def get_indices(full_text, section_text, norm_pat=None, start=0):
     Get token indices
     '''
     # Tokenized document as list of list of string
-    section_tokens = tokenize_doc(section_text, 
-        norm_pat = norm_pat)
+    section_tokens = tokenize_doc(section_text, norm_pat = norm_pat)
     
     # Start and stop indices of tokens
-    #indices = get_char_indices(text, tokenized, subs=None)
     indices = align(full_text, section_tokens, start=start)
 
-    '''
-    print('='*72)
-    
-
-    print("Full text")
-    print('-'*72)
-    print(full_text)
-    print('-'*72)
-    
-
-    print("section text")
-    print('-'*72)
-    print(section_text)
-    print('-'*72)
-
-
-    print("Start")
-    print(start)
-    
-    print("section tokens")
-    print(section_tokens)
-
-
-    print("indices")
-    print(indices)
-
-
-    with open("A_fulltext.txt",'w') as f:
-        f.write(full_text)
-    with open("A_sectiontext.txt",'w') as f:
-        f.write(section_text)
-
-    with open("A_start.json",'w') as f:
-        json.dump(start, f)
-
-    with open("A_section_tokens.json",'w') as f:
-        json.dump(section_tokens, f)
-
-    with open("A_indices.json",'w') as f:
-        json.dump(indices, f)
-    '''        
-
     return indices
-
 
 
 def get_tokens(text, indices):
@@ -271,22 +147,12 @@ def get_tokens(text, indices):
     Extract tokens from text using character indices
     '''     
        
-    # Loop on indices by sentence
     document = []
     for sent_indices in indices:
-        
-        # Initialize tokenize sentence
         sent = []
-        
-        # Loop on indices by token
         for start, stop in sent_indices:
-
-            # Append to sentence
             sent.append(text[start:stop])
-        
-        # Append to document
         document.append(sent)
-
        
     return document
 
@@ -300,12 +166,6 @@ def get_substitutions(orig, norm, flatten=False):
         orig = [tok for sent in orig for tok in sent]
         norm = [tok for sent in norm for tok in sent]
     
-    # Check lengths
-    # orig_len = len(orig)
-    # norm_len = len(norm)
-    # assert orig_len == norm_len, \
-    #               "Length mismatch: {} vs {}".format(orig_len, norm_len)
-
     # Get all substitutions
     subs = [(o, n) for o, n in zip(orig, norm) if o != n]
 
@@ -320,7 +180,6 @@ def get_substitutions(orig, norm, flatten=False):
     return df
 
 
-
 def get_sections(note, \
                 section_generic = SECTION_GENERIC, 
                 not_sections = NOT_SECTIONS, 
@@ -332,9 +191,6 @@ def get_sections(note, \
     Parse document into sections
         note: document as string
     '''
-
-    # Check argument type
-    assert isinstance(note, str), 'Document must be a string'
 
     # Regular expressions for generic and target headings
     regex_generic = re.compile(section_generic, flags=re.IGNORECASE)
@@ -381,7 +237,6 @@ def get_sections(note, \
         section_names_orig.insert(0, SECTION_START)
         section_names_norm.insert(0, SECTION_START)
 
-
     # Start and stop indices for section    
     start = section_indices[:]
     stop = start[1:] + [len(lines)]
@@ -404,27 +259,6 @@ def get_sections(note, \
         
         # Section token indices
         section_indices = get_indices(note, section_text, norm_pat, start=start_char)
-        '''
-        print('section_indices')
-        print(section_indices)
-        if len(section_indices) > 0:
-            print("0 dim", section_indices[-1])
-        
-            if len(section_indices[-1]) > 0:
-                print("1 dim", section_indices[-1][-1])           
-
-                if len(section_indices[-1][-1]) > 0:
-                    print("2 dim", section_indices[-1][-1][1])           
-                else:
-                    print('missing 2')
-
-            else:
-                print('missing 1')
-        else:
-            print('missing 0')
-        '''
-        
-        
         start_char = section_indices[-1][-1][1]
         note_indices.extend(section_indices)
         
@@ -436,15 +270,13 @@ def get_sections(note, \
     orig = ''.join(note.split())
     new_ = ''.join("".join(note_text).split())
   
-  
     assert orig == new_, \
         '''error in extracting sections
                 char length string = {}
                 char length sectioned = {}
         '''.format(len(orig), len(new_))
     
-    from_idx = ''.join([note[idx[0]:idx[1]] \
-                    for sent_idxs in note_indices for idx in sent_idxs])                            
+    from_idx = ''.join([note[idx[0]:idx[1]] for sent_idxs in note_indices for idx in sent_idxs])                            
     from_idx = ''.join(from_idx.split())
     assert orig == from_idx, \
         '''error in extracting token indices
@@ -458,7 +290,6 @@ def get_sections(note, \
     assert len(note_indices) == len(note_sections_norm), 'length mismatch'
 
     return (note_indices, note_sections_norm, note_sections_orig)
-    
 
 
 def rm_linebreaks(doc, \
@@ -472,16 +303,13 @@ def rm_linebreaks(doc, \
     
     if (num_list_pat is None) and (section_pat is None) and (initial_cap_pat is None):
         new_doc = re.sub('\n', ' ', doc)
-        
-            
     else:
-        
         # Regular expression for matching numbered lists and
         # section headings       
         num_list_regex = re.compile(num_list_pat, flags=re.I)
         section_regex = re.compile(section_pat, flags=re.I)
         initial_cap_regex = re.compile(initial_cap_pat)
-        
+
         # Split into lines (not sentences)
         lines = doc.splitlines()
 
@@ -501,7 +329,6 @@ def rm_linebreaks(doc, \
             
         new_doc = "".join(new_doc)
 
-    
     return new_doc         
 
 def compare_dims(X, Y):
