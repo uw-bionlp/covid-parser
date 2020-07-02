@@ -87,14 +87,13 @@ def docs2wordpiece(docs, xfmr_type, xfmr_dir):
 
     return (word_pieces, word_piece_ids)
         
-def tokens2wordpiece(tokens, xfmr_type, xfmr_dir, get_last=True, tokenizer=None):
+def tokens2wordpiece(tokens, xfmr_type, xfmr_dir, get_last=True):
     '''
     Get word-word pieces and alignment for sentences
     '''
     
     # Get tokenizer
-    if not tokenizer:
-        tokenizer = get_tokenizer(xfmr_type, xfmr_dir)
+    tokenizer = get_tokenizer(xfmr_type, xfmr_dir)
         
     # Word piece tokens
     word_pieces = []
@@ -170,73 +169,6 @@ def get_attn_mask(X, seq_len, dtype=np.int32):
     
     return Y
 
-    
-def get_embeddings_preloaded(model, word_piece_ids, tok_idx,
-        max_len = None, 
-        num_workers = 6, 
-        batch_size = 100,
-        device = None):
-    
-    tok_idx_fill = -1
-
-    # If token indices not provided, use all
-    if tok_idx is None:
-        tok_idx = [list(range(0, len(sent))) for sent in word_piece_ids]
-
-    # Get maximum length
-    if max_len is None:
-        max_len = max([len(w) for w in word_piece_ids])
-
-    # Create attention mask, indicating valid token positions
-    attn_mask = get_attn_mask(word_piece_ids, max_len)
-
-    # Pad
-    word_piece_ids = pad_sequences(word_piece_ids, max_len)
-    tok_idx = pad_sequences(tok_idx, max_len, fill=tok_idx_fill)
-    
-    # Convert to tensor
-    word_piece_ids = torch.tensor(word_piece_ids)
-    tok_idx = torch.tensor(tok_idx)
-    attn_mask = torch.tensor(attn_mask)
-        
-    # Create data set
-    dataset = data_utils.TensorDataset(word_piece_ids, attn_mask, tok_idx)
-
-    # Create data loader
-    dataloader = data_utils.DataLoader(dataset, \
-                batch_size=batch_size, 
-                shuffle = False, 
-                num_workers=num_workers)
-
-    # Loop on batches
-    # Predict hidden states features for each layer
-    embeddings = []
-    for wp_ids_bat, attn_mask_bat, tok_idx_bat in dataloader:
-        
-        # Get embeddings (no gradient)
-        with torch.no_grad():
-            embed_bat = model( \
-                  input_ids = wp_ids_bat.to(device), 
-                  token_type_ids = None, 
-                  attention_mask = attn_mask_bat.to(device))[0]
-        
-        # Convert to numpy array
-        embed_bat = embed_bat.cpu().numpy()
-        tok_idx_bat = tok_idx_bat.cpu().numpy()
-            
-        # Loop on sequences and extract relevant embeddings
-        for embed_seq, tok_idx_seq in zip(embed_bat, tok_idx_bat):
-            
-            # Remove trailing zeros
-            tok_idx_seq = tok_idx_seq[tok_idx_seq != tok_idx_fill]
-        
-            # Get embeddings associated with specific indices
-            embed_seq = embed_seq[tok_idx_seq, :]
-            
-            embeddings.append(embed_seq)
-    
-    return embeddings  
-
 def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
         max_len = None, 
         num_workers = 6, 
@@ -287,9 +219,6 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
                 shuffle = False, 
                 num_workers=num_workers)
 
-    # Create progress bar
-    pbar = tqdm(total=len(dataloader))
-
     # Loop on batches
     # Predict hidden states features for each layer
     embeddings = []
@@ -316,11 +245,6 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
             embed_seq = embed_seq[tok_idx_seq, :]
             
             embeddings.append(embed_seq)
-        
-        # Update progress bar
-        pbar.update()
-        
-    pbar.close()     
     
     return embeddings  
 

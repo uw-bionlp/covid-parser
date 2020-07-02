@@ -29,18 +29,9 @@ class DocumentProcessor():
         # Tokenize document        
         indices, sections, sections_orig = get_sections(text)
         indices = wrap_sentences(indices, 30)
-        sents = get_tokens(text, indices)
-        
-        # Extractor operates on a list of documents
-        sents = [sents]
-        
-        '''
-        Prediction
-        '''
-        events = self.model.predict_fast(sents, self.embedding_model, self.tokenizer_model, device=self.device)
-        
-        '''
-        Postprocessing
-        '''
+        sents = [ get_tokens(text, indices) ]
+
+        events = self.model.predict(sents, device=-1)
         events_flat = [ evt for doc in events for sent in doc for evt in sent ]
+        
         return [ evt.to_dict(char_indices=indices) for evt in events_flat ]

@@ -306,27 +306,16 @@ def get_device(device_id=None):
     '''
     Determine if GPU (CUDA) is functional
     '''
-
-    logging.info('Get device')
-    logging.info('\tInput device id:\t{}'.format(device_id))
     
     # Get GPU count
     gpu_dev_count = torch.cuda.device_count()   
-    logging.info("\tCUDA device count:\t{}".format(gpu_dev_count))
     
     # No GPU found
     if (gpu_dev_count == 0) or (device_id == -1):
-        
-        if not ((device_id is None) or (device_id == -1)):
-            logging.warn('Input device_id provided, but could not find any GPU. Defaulting to CPU.')        
-        
         device = 'cpu'
     
     # At least 1 GPU found
     elif gpu_dev_count > 0:        
-    
-        # Print GPU utilization
-        logging.info('\tGPU utilization:\n{}'.format(GPUtil.showUtilization()))
     
         # Use provided GPU ID
         if device_id is not None:
@@ -348,8 +337,6 @@ def get_device(device_id=None):
             device = 'cuda:{}'.format(device_id)
     else:
         raise ValueError("invalid GPU device count")
-        
-    logging.info("\tOutput device:\t{}".format(device))
 
     return device
 

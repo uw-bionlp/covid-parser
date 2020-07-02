@@ -26,7 +26,7 @@ import math
 from utils.misc import nested_dict_to_list, list_to_nested_dict, dict_to_list
 from utils.seq_prep import preprocess_tokens_doc
 from models.crf import add_bio_labels, BIO_to_span
-from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check, get_embeddings_preloaded
+from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
 from models.utils import pad_embedding_seq, mem_size, pad_sequences, create_mask,  seq_label,  map_1D, map_2D, map_dict_builder
 from corpus.event import Event, Span, events2sent_labs, events2seq_tags
 
@@ -197,18 +197,18 @@ def preprocess_X_xfmr(X, \
                             tokens = X, 
                             xfmr_type = xfmr_type, 
                             xfmr_dir = xfmr_dir, 
-                            get_last = get_last,
-                            tokenizer = tokenizer_model)
+                            get_last = get_last
+                            )
 
     # Get sequence length, with start and and padding
     seq_lengths = [len(x) for x in tok_idx]
     
     # X as embedding
-    embed = get_embeddings_preloaded(embedding_model,
+    embed = get_embeddings(\
                             word_piece_ids = wp_ids, 
                             tok_idx = tok_idx, 
-                            #xfmr_type = xfmr_type, 
-                            #xfmr_dir = xfmr_dir, 
+                            xfmr_type = xfmr_type, 
+                            xfmr_dir = xfmr_dir, 
                             num_workers = num_workers,
                             batch_size = batch_size,
                             device = device)

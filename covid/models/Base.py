@@ -427,16 +427,6 @@ class Base(object):
 
         return y
 
-    def predict_fast(self, X, embedding_model, tokenizer_model, device=None, **kwargs):
-
-        # Apply mask
-        X_ss = self.apply_mask(X, mask=None)        
-        
-        # Get predictions
-        y_ss = self.predict_sub_op_fast(X_ss, embedding_model, tokenizer_model, device, **kwargs)
-
-        return y_ss
-
     def predict(self, X, mask=None, **kwargs):
         '''
         Predict labels, potentially with masking
