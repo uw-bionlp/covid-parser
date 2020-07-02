@@ -11,12 +11,17 @@ COPY utils       /usr/src/app/utils
 COPY main.py process.py constants.py requirements.txt /usr/src/app/
 
 # Load clinicalBERT
+RUN apt-get update              && \
+    apt-get install -y wget     && \
+    rm -rf /var/lib/apt/lists/*
 RUN wget -O pretrained_bert_tf.tar.gz https://www.dropbox.com/s/8armk04fu16algz/pretrained_bert_tf.tar.gz?dl=1 && \
     tar -xzf pretrained_bert_tf.tar.gz                                                                         && \
     tar -xzf pretrained_bert_tf/biobert_pretrain_output_all_notes_150000.tar.gz                                && \
     mkdir pretrained                                                                                           && \ 
     mv biobert_pretrain_output_all_notes_150000 pretrained/                                                    && \
-    rm -rf pretrained_bert_tf
+    cd pretrained/biobert_pretrain_output_all_notes_150000/                                                    && \
+    mv bert_config.json config.json && cd ../..                                                                && \
+    rm -rf pretrained_bert_tf                                                                                   
 
 # pip install
 RUN pip install --upgrade pip

@@ -28,8 +28,7 @@ class CovidServicer(BaseCovidServicer):
         return result
 
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-add_CovidServicer_to_server(
-    CovidServicer(), server)
+add_CovidServicer_to_server(CovidServicer(), server)
 server.add_insecure_port('[::]:8080')
 server.start()
 server.wait_for_termination()
