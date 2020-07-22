@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 from torch.nn.modules.activation import Sigmoid, ReLU
-from models.utils import one_hot, one_hot, get_activation_fn, trig_exp, entity_exp, device_check, mem_size, tensor_summary
+from pytorch_models.utils import one_hot
 
 from allennlp.modules import FeedForward
+#from allennlp.nn.util import add_position_features
 from allennlp.modules.span_extractors import SelfAttentiveSpanExtractor
 from allennlp.modules.span_extractors import EndpointSpanExtractor
 from collections import OrderedDict
@@ -12,9 +13,14 @@ import math
 
 from constants import STATUS, ENTITIES
 
+from pytorch_models.utils import one_hot, get_activation_fn
+from pytorch_models.utils import trig_exp, entity_exp, device_check, mem_size, tensor_summary
+
 GOLD = 'gold'
 RULE = 'rule'
 LEARNED = 'learned'
+
+
 
 
 def prune_arguments(arg_labels, trig_indices_top, arg_indices_top,

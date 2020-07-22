@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import copy
 import os
-
+import matplotlib.ticker as ticker
 #pd.set_option('display.max_rows', 500)
 #pd.set_option('display.max_columns', 500)
 #pd.set_option('display.width', 1000)
@@ -14,10 +14,11 @@ from utils.seq_prep import strip_BIO_tok, is_begin, is_inside, is_outside
 from utils.misc import to_flat_list
 from utils.scoring import add_params_to_df
 from utils.df_helper import filter_df
-from models.utils import get_mapping_dicts, get_num_tags_dict, map_1D
-from constants import *
+from pytorch_models.utils import get_mapping_dicts, get_num_tags_dict, map_1D
+from  constants import *
 from corpus.labels import merge_labels, merge_labels_
 from utils.misc import list_to_dict, list_to_nested_dict
+
 
 import matplotlib as mpl
 mpl.use('Agg')
@@ -203,15 +204,47 @@ class Event(object):
     
     def to_dict(self, char_indices=None):
         
-        event_dict = {}
-        event_dict['type'] = self.type_
-        event_dict['arguments'] = []
+        d = {}
+        d['type'] = self.type_
+        d['arguments'] = []
         for arg in self.arguments:
             arg_dict = arg.to_dict(char_indices=char_indices)
-            event_dict['arguments'].append(arg_dict)
+            d['arguments'].append(arg_dict)
         
-        return event_dict
+        return d
 
+    def to_summary_dicts(self, excl_arg_types=None, to_str=False):
+        
+        labels = {}
+        spans = {}
+        for arg in self.arguments:
+            
+            if (excl_arg_types is None) or \
+               (arg.type_ not in excl_arg_types):
+            
+
+                if arg.label is None:                    
+                    # Span representation
+                    # Represent as string
+                    k = (self.type_, arg.type_)
+                    if k not in spans:
+                        spans[k] = []
+                    spans[k].append(' '.join(arg.tokens))
+                
+                else:                    
+                    # Label representation
+                    # Encode labeled spans as one hot encoding
+                    #   1 = one or more occurrences of category
+                    k = (self.type_, arg.type_, arg.label)
+                    labels[k] = 1
+
+
+                
+        if to_str:
+            spans = {k: "|".join(v) for k, v in spans.items()}
+        
+        return (labels, spans)
+                
 
 class EventScorer(object):
     
@@ -1613,7 +1646,7 @@ def len_check(X, Y):
     assert len(X) == len(Y), '{} vs. {}'.format(len(X), len(Y))
 
 
-def events2row(events, excl_arg_types=None):
+def doc_events2row(events, excl_arg_types=None):
     '''
     Convert a document represented as events to a row
     
@@ -1640,39 +1673,39 @@ def events2row(events, excl_arg_types=None):
         # Iterate over event in current sentence
         for event in sent_events:
             
-            # Iterate over arguments in current event
-            for arg in event.arguments:
+            labs, spns = event.to_summary_dicts( \
+                                excl_arg_types = excl_arg_types,
+                                to_str = False)
+            
+            for k, v in labs.items():
+                labels[k] = v
+            
+            for k, v in spns.items():
+                if k not in spans:
+                    spans[k] = []
                 
-                arg_typ_incl = (excl_arg_types is None) or \
-                               (arg.type_ not in excl_arg_types)
-                
-                # Label representation
-                # Encode labeled spans as one hot encoding
-                #   1 = one or more occurrences of category
-                if (arg.label is not None) and arg_typ_incl:                    
-                    k = (event.type_, arg.type_, arg.label)
-                    labels[k] = 1
-                
-                # Span representation
-                # Represent as string
-                if arg_typ_incl:              
-                    k = (event.type_, arg.type_)
-                    if k not in spans:
-                        spans[k] = []
-
-                    spans[k].append(' '.join(arg.tokens))
-    
+                spans[k].extend(v)
+   
     for k in spans:
         spans[k] = '|'.join(spans[k])
 
     return (labels, spans)
             
 
+def excel_quote(x):
+    if isinstance(x, str):
+        return '''="{}"'''.format(x)
+        
+    else:
+        return x        
+
 def events2table(ids, events, \
                 patients=None, 
                 path = None, 
-                filename ='tabular_predictions.csv',
-                excl_arg_types = None):
+                filename = 'tabular_predictions_{}.csv',
+                by_note = True,
+                excl_arg_types = None,
+                quote_format = False):
                     
     '''
     Convert a list of documents represented as events to a table
@@ -1691,24 +1724,52 @@ def events2table(ids, events, \
     else: 
         assert len(ids) == len(patients)
     
-    for id_, patient, doc_events in zip(ids, patients, events):
-        
-        # Row representation of document
-        labels, spans = events2row(doc_events, \
-                        excl_arg_types = excl_arg_types)
-        
-        # Accumulate label and span keys
-        label_keys = label_keys.union(set(labels.keys()))
-        span_keys = span_keys.union(set(spans.keys()))
-        
-        row = OrderedDict()
-        row[('id',)] = id_
-        row[('patient',)] = patient
-        row.update(labels)
-        row.update(spans)
-        
-        rows.append(row)
+    # Each row is a note
+    if by_note:   
+        filename = filename.format('by_note')
+        for id_, patient, doc_events in zip(ids, patients, events):
+            
+            # Row representation of document
+            labels, spans = doc_events2row(doc_events, \
+                            excl_arg_types = excl_arg_types)
+            
+            # Accumulate label and span keys
+            label_keys = label_keys.union(set(labels.keys()))
+            span_keys = span_keys.union(set(spans.keys()))
+            
+            row = OrderedDict()
+            row[('id',)] = id_
+            row[('patient',)] = patient
+            row.update(labels)
+            row.update(spans)
+            
+            rows.append(row)
 
+    # Each row is an event
+    else:
+        filename = filename.format('by_event')
+        for id_, patient, doc_events in zip(ids, patients, events):
+            
+            for sent in doc_events:
+                for evt in sent:
+
+                    labels, spans = evt.to_summary_dicts( \
+                                        excl_arg_types = excl_arg_types,
+                                        to_str = True)
+
+                    # Accumulate label and span keys
+                    label_keys = label_keys.union(set(labels.keys()))
+                    span_keys = span_keys.union(set(spans.keys()))
+                    
+                    row = OrderedDict()
+                    row[('id',)] = id_
+                    row[('patient',)] = patient
+                    row.update(labels)
+                    row.update(spans)
+                    
+                    rows.append(row)
+            
+            
     # Create data frame from rows
     df = pd.DataFrame(rows)   
     col_count1 = len(list(df))
@@ -1728,8 +1789,12 @@ def events2table(ids, events, \
 
 
     df.rename(columns='_'.join, inplace=True)
+    
+    if quote_format:
+        df = df.applymap(excel_quote)
 
     if path is not None:
+        
         fn = os.path.join(path, filename)
         df.to_csv(fn, index=False)
     
@@ -1957,6 +2022,223 @@ def perf_plot( \
 
     return True
 
+
+
+def perf_plot2( \
+    df,
+    path,
+    case = None,
+    figsize=(2.2, 1.5),
+    font_family = 'serif',
+    font_type = 'Times New Roman',
+    font_size = 6,   
+    width = 0.3,
+    wrap_xlabels = True,
+    color = 'tab:blue',
+    
+    #x_offset = -0.2,
+    #left=0.15,
+    #bottom=0.25,
+    #right=0.98,
+    #top=0.98,
+    ymin = 0.7, # 0.7,
+    ymax = 1.0, # 1.04,
+    #label_columns = True,
+    dpi = 800
+    ):
+        
+    print('='*72)    
+    print(df)    
+    print('='*72)    
+    
+    
+    
+    
+    
+    # Font configuration
+    plt.rcParams['font.size'] = font_size
+    plt.rcParams['font.family'] = font_family
+    plt.rcParams['font.serif'] = [font_type] + plt.rcParams['font.serif']
+
+    logging.info('-'*72)
+    logging.info('Event extraction performance plot')
+    logging.info('-'*72)
+    
+    n_df = len(df)
+    logging.info('Data frame length:\t{}'.format(n_df))
+    
+    trig_id = df[(df[EVAL_TYPE] == SPAN) & 
+              (df[ARGUMENT] == TRIGGER)]
+    n_trig_id = len(trig_id)              
+    logging.info('Trigger ID count:\t{}'.format(n_trig_id))
+    
+    arg_id_labeled = df[(df[EVAL_TYPE] == SPAN) & 
+                        (df[ARGUMENT] != TRIGGER) &
+                        (df[LABEL] != NONE_PH)]
+    n_arg_id_labeled = len(arg_id_labeled)
+    logging.info('Argument ID, label count:\t{}'.format(n_arg_id_labeled))
+    
+    arg_id_span_only = df[(df[EVAL_TYPE] == SPAN) & 
+                          (df[ARGUMENT] != TRIGGER) &
+                          (df[LABEL] == NONE_PH)]
+    n_arg_id_span_only = len(arg_id_span_only)
+    logging.info('Argument ID, span-only count:\t{}'.format(n_arg_id_span_only))
+
+    arg_id = df[(df[EVAL_TYPE] == SPAN) & 
+                (df[ARGUMENT] != TRIGGER)]
+    n_arg_id = len(arg_id)
+    logging.info('Argument ID, all count:\t{}'.format(n_arg_id))
+
+
+    trig_role = df[(df[EVAL_TYPE] == ARGUMENT) & 
+              (df[ARGUMENT] == TRIGGER)]
+    n_trig_role = len(trig_role)              
+    logging.info('Trigger role count:\t{}'.format(n_trig_role))
+
+
+    arg_role_labeled = df[(df[EVAL_TYPE] == ARGUMENT) & 
+                        (df[ARGUMENT] != TRIGGER) &
+                        (df[LABEL] != NONE_PH)]
+    n_arg_role_labeled = len(arg_role_labeled)
+    logging.info('Argument role, labeled count:\t{}'.format(n_arg_role_labeled))
+
+    
+    arg_role_span_only = df[(df[EVAL_TYPE] == ARGUMENT) & 
+                          (df[ARGUMENT] != TRIGGER) &
+                          (df[LABEL] == NONE_PH)]
+    n_arg_role_span_only = len(arg_role_span_only)
+    logging.info('Argument role, span-only count:\t{}'.format(n_arg_role_span_only))    
+    
+
+    arg_role = df[(df[EVAL_TYPE] == ARGUMENT) & 
+                (df[ARGUMENT] != TRIGGER)]
+    n_arg_role = len(arg_role)
+    logging.info('Argument role, all count:\t{}'.format(n_arg_role))
+   
+    
+    assert n_df == n_trig_id + n_arg_id_labeled + n_arg_id_span_only + \
+                n_trig_role + n_arg_role_labeled + n_arg_role_span_only
+
+    logging.info("Trigger role:\n{}".format(trig_role))
+    logging.info("Labeled argument role:\n{}".format(arg_role_labeled))
+    logging.info("Span-only argument role:\n{}".format(arg_role_span_only))
+
+
+    dfs = [('Trigger', trig_role),
+           ('Labeled argument', arg_role_labeled),
+           ('Span-only argument', arg_role_span_only)]
+
+    vals = []
+    xlabels = []
+    for name, df_ in dfs:
+        TP = df_['TP'].sum()
+        FP = df_['FP'].sum()
+        FN = df_['FN'].sum()
+        P = TP/(TP + FP)
+        R = TP/(TP + FN)
+        F1 = 2*(P*R)/(P+R)
+        vals.append(F1)
+        xlabels.append(name)
+
+    logging.info('Summary values for plotting:')
+    logging.info('\t{}\t{}'.format('name', 'F1'))
+    for name, F1 in zip(xlabels, vals):
+        logging.info('\t{}\t{}'.format(name, F1))
+
+
+    
+    # Instantiate figure
+    fig, ax = plt.subplots(figsize=figsize)
+    #plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top)
+
+    xticks = list(range(len(vals)))
+    rect = ax.bar(xticks, vals, width, color=color)
+
+    '''
+    # Iterate over columns
+    rects = []
+    xticks = []
+    xlabels = []
+    #ymin = 1
+    #ymax = 0
+    txt_offset = 0.01
+    offset = txt_offset + 0.02
+    for j, (name, val) in enumerate(vals):
+    
+        # Add bars
+        rect = ax.bar([i], [val], width, color=c) #, color=colors[j], label=labels[j])
+        rects.append(rect)
+        #ymin = min(ymin, val)
+        #ymax = max(ymax, val)
+        
+        if label_columns:
+            txt = ax.text(i, val + txt_offset, '{:.2f}'.format(val), color='black', va='bottom', ha='center') #fontweight='bold',
+
+
+        xticks.append(i)
+        xlabels.append(name)
+
+    '''    
+    
+    if ymin is None:
+        ymin = np.floor(min(vals)*20)/20
+    if ymax is None:
+        ymax = np.ceil(max(vals)*20)/20
+
+    ax.set_ylim((ymin, ymax))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.05))
+    
+    
+    ax.set_xticks(xticks)
+    
+    
+    if wrap_xlabels:
+        xlabels = ['\n'.join(f.split()) for f in xlabels]
+    ax.set_xticklabels(xlabels, rotation=0)
+
+
+    
+
+    #for t, l in zip(xticks_mid, xlabel_mid):   
+    #    ax.text(t, x_offset, l, \
+    #         va='top', ha='center', transform=ax.get_xaxis_transform(), fontweight='bold')
+
+    #linewidth = 0.5
+    #for t in xticks_div:
+    #    line = plt.Line2D([t, t], [x_offset*0.1, x_offset*1.4],
+    #                  transform=ax.get_xaxis_transform(), color='black', linewidth=linewidth)
+    #    line.set_clip_on(False)
+    #    ax.add_line(line)
+
+
+    ax.set_ylabel('F1', fontweight='bold')
+    ax.set_axisbelow(True)    
+    ax.yaxis.grid(True)
+
+    
+    # Save figure
+    plt.tight_layout()
+    fig = ax.get_figure()
+    if os.path.isdir(path):
+        for ext in ['pdf', 'png', 'eps']:
+            if case is None:
+                 fn = os.path.join(path, 'event_performance.{}'.format(ext))
+            else:        
+                fn = os.path.join(path, 'event_performance_{}.{}'.format(case, ext))
+            
+            if ext != 'pdf':
+                fig.savefig(fn, dpi=dpi)
+            else:
+                fig.savefig(fn)
+
+    else:
+        fn = path
+        fig.savefig(fn, dpi=dpi)
+
+        
+    
+
+    return True
 
 def get_groups(row):
     '''

@@ -9,6 +9,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
+#torch.multiprocessing.set_start_method("spawn")
+
 import pandas as pd
 
 import sys
@@ -23,12 +25,17 @@ import joblib
 import math
 
 
+from pytorch_models.utils import pad_embedding_seq, mem_size
+from pytorch_models.utils import pad_sequences
 from utils.misc import nested_dict_to_list, list_to_nested_dict, dict_to_list
+
+
 from utils.seq_prep import preprocess_tokens_doc
-from models.crf import add_bio_labels, BIO_to_span
-from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
-from models.utils import pad_embedding_seq, mem_size, pad_sequences, create_mask,  seq_label,  map_1D, map_2D, map_dict_builder
+from pytorch_models.utils import create_mask,  seq_label,  map_1D, map_2D
+from pytorch_models.crf import add_bio_labels, BIO_to_span
 from corpus.event import Event, Span, events2sent_labs, events2seq_tags
+from pytorch_models.utils import map_dict_builder
+from pytorch_models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
 
 from constants import *
 
@@ -175,8 +182,6 @@ def preprocess_X_xfmr(X, \
                 num_workers = 6,
                 get_last = True,
                 batch_size = 50,
-                embedding_model = None,
-                tokenizer_model = None
                 ):
 
     '''
@@ -188,23 +193,34 @@ def preprocess_X_xfmr(X, \
             e.g.[['Patient', 'denies', 'tobacco', '.'], [...]]
     
     '''    
+
+        
+    logging.info('='*72)
+    logging.info('Preprocessing X')
+    logging.info('='*72)
     
     # Flatten documents into sequence of sentences
     X = [sent for doc in X for sent in doc]
+    logging.info('Document count:\t{}'.format(len(X)))
+    logging.info('Flattened documents to sequence of sentences')
+    logging.info('Sentence count:\t{}'.format(len(X)))
     
+    logging.info('Encoding input using transformer...')
+    
+
     # Get word pieces
     wp_toks, wp_ids, tok_idx = tokens2wordpiece( \
                             tokens = X, 
                             xfmr_type = xfmr_type, 
                             xfmr_dir = xfmr_dir, 
-                            get_last = get_last
-                            )
+                            get_last = get_last)
 
     # Get sequence length, with start and and padding
     seq_lengths = [len(x) for x in tok_idx]
     
+            
     # X as embedding
-    embed = get_embeddings(\
+    embed = get_embeddings( \
                             word_piece_ids = wp_ids, 
                             tok_idx = tok_idx, 
                             xfmr_type = xfmr_type, 
@@ -220,20 +236,24 @@ def preprocess_X_xfmr(X, \
     
     # Convert embeddings to tensor
     embed = torch.tensor(embed)
+
+    logging.info('Sequence length min:\t{}'.format(min(seq_lengths)))
+    logging.info('Sequence length max:\t{}'.format(max(seq_lengths)))
+    logging.info('Embedding dimensions:\t{}'.format(embed.shape))
+    logging.info('Embedding memory size:\t{}'.format(mem_size(embed)))
               
+
+    
+    logging.info('')
     return (X, embed, seq_lengths)    
 
 
 def preprocess_X_w2v(X, \
-                to_lower = True, 
                 embed_map = None,                
                 embed_matrix = None, 
-                freeze = True, 
                 max_len = 30, 
                 pad_start = True, 
                 pad_end = True, 
-                num_workers = 6,
-                unk = UNK, 
                 start_token = START_TOKEN, 
                 end_token = END_TOKEN):
 
@@ -259,15 +279,6 @@ def preprocess_X_w2v(X, \
     logging.info('\tFlattened documents to sequence of sentences')
     logging.info('\tSentence count:\t{}'.format(len(X)))
     
-    # Convert to lowercase
-    if to_lower:       
-        X = [[tok.lower() for tok in sent] for sent in X]
-        logging.info('\tConverting to lowercase. Ex.')
-        for x in X[0:5]:
-            logging.info('\t\t{}'.format(x))
-    else:
-        logging.warn('\tNOT converting to lowercase')
-    
     # Include start and end of sequence padding tokens 
     # (still variable length)
     tokens_proc = preprocess_tokens_doc(X, \
@@ -285,7 +296,9 @@ def preprocess_X_w2v(X, \
 
     # Pad so fixed length sequence
     ids = pad_sequences(ids, max_len)
-    ids = torch.LongTensor(ids).to(embed_matrix.weight.device)
+    ids = torch.LongTensor(ids).cpu()
+    embed_matrix = embed_matrix.cpu()
+    #ids = torch.LongTensor(ids).to(embed_matrix.weight.device)
     
     embed = embed_matrix(ids)
     
@@ -494,10 +507,8 @@ class MultitaskDataset(Dataset):
     """   
     """
     def __init__(self, X, y, label_def, \
-        word_embed_to_lower = True,
         word_embed_map = None,
         word_embed_matrix = None,
-        word_embed_freeze = True ,
         xfmr_type = None,
         xfmr_dir = None,
         xfmr_device = None,
@@ -528,7 +539,7 @@ class MultitaskDataset(Dataset):
         '''
         
         self.label_def = label_def
-        self.word_embed_map = word_embed_map
+
         self.xfmr_type = xfmr_type
         self.xfmr_dir = xfmr_dir
         self.use_xfmr = use_xfmr
@@ -537,8 +548,7 @@ class MultitaskDataset(Dataset):
         self.pad_start = pad_start
         self.pad_end = pad_end
         self.num_workers = num_workers
-        self.word_embed_to_lower = word_embed_to_lower
-        self.word_embed_freeze = word_embed_freeze
+
         
         self.doc_count = len(X)
         self.sent_counts = [len(doc) for doc in X]       
@@ -561,14 +571,11 @@ class MultitaskDataset(Dataset):
         else:
             self.tokens, self.X, self.seq_lengths = preprocess_X_w2v( \
                     X = X, 
-                    to_lower = word_embed_to_lower, 
                     embed_map = word_embed_map, 
                     embed_matrix = word_embed_matrix,
-                    freeze = word_embed_freeze, 
                     max_len = self.max_len, 
                     pad_start = pad_start, 
-                    pad_end = pad_end,
-                    num_workers = self.num_workers)            
+                    pad_end = pad_end)            
                     
         assert len(self.X) == self.seq_count
         
@@ -590,7 +597,14 @@ class MultitaskDataset(Dataset):
                                         max_len = self.max_len, 
                                         pad_start = self.pad_start,
                                         label_to_id = self.label_to_id)
-             
+       
+
+        logging.info("")
+        logging.info("Multitask Data set")
+        logging.info("Document count:\t{}".format(self.doc_count))
+        logging.info("Sentence count:\t{}".format(self.seq_count))            
+
+
         
     def __len__(self):
         return self.seq_count

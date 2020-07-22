@@ -25,10 +25,14 @@ from utils.misc import dict_to_list
 from utils.seq_prep import preprocess_labels_doc, preprocess_tokens_doc
 from utils.seq_prep import OUTSIDE, NEG_LABEL
 from collections import namedtuple
-from more_itertools import unique_everseen
+from  more_itertools import unique_everseen
 
-from annotate.standoff_load import TEXT_FILE_EXT, ANN_FILE_EXT, ENTITY_MAP_CREATE
+from annotate.standoff_load import TEXT_FILE_EXT, ANN_FILE_EXT
 from corpus.alignment import align
+
+
+from annotate.standoff_load import ENTITY_MAP_CREATE
+
 
 Index = namedtuple('Index', ['start', 'stop'])
 Span = namedtuple('Span', ['event', 'entity', 'start', 

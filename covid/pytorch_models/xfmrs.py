@@ -10,8 +10,9 @@ from tqdm import tqdm
 import numpy as np
 import logging
 
-from models.utils import trunc_seqs, pad_sequences, get_device
-from models.similarity import normalize_embed
+from pytorch_models.utils import trunc_seqs, pad_sequences
+from pytorch_models.utils import get_device
+from pytorch_models.similarity import normalize_embed
 
 CLS = "[CLS]"
 SEP = "[SEP]"
@@ -137,9 +138,25 @@ def tokens2wordpiece(tokens, xfmr_type, xfmr_dir, get_last=True):
     for wrd_pc in word_pieces:
         word_piece_ids.append(tokenizer.convert_tokens_to_ids(wrd_pc))
 
+
+    logging.info('XFMR word pieces generated:')
+    for i, (wt, wi, ti) in enumerate(zip(word_pieces, word_piece_ids, token_indices)):
+        if i > 5:
+            break
+        logging.info('Example: {} ------------'.format(i))
+        logging.info('word pieces:\t{}'.format(wt))
+        logging.info('word pieces ids:\t{}'.format(wi))        
+        logging.info('token indices:\t{}'.format(ti))
+
+
     wp_toks_max_len = max([len(w) for w in word_pieces])
     tok_idx_max = max([max(w) for w in token_indices])
     tok_idx_max_len = max([len(w) for w in token_indices])
+    
+    logging.info('')
+    logging.info('Max word pieces sent length:\t{}'.format(wp_toks_max_len))
+    logging.info('Max word piece index:\t{}'.format(tok_idx_max))
+    logging.info('Max token index seq length:\t{}'.format(tok_idx_max_len))
     
     
     return (word_pieces, word_piece_ids, token_indices)
@@ -151,6 +168,28 @@ def embed_len_check(X, Y):
     for x, y in zip(X, Y):
         assert len(x) == len(y)-2, '{} vs {}'.format(len(x), len(y)-2)
     return True
+
+#def pad2D(X, max_seq_len):
+#
+#
+#    dtype = type(X[0][0])
+#
+#    Y = [] 
+#    for x in X: 
+#        
+#        # Initialize array of zeros with desired size
+#        padded = np.zeros(max_seq_len, dtype=dtype) 
+#        
+#        # Insert variable length array into fixed/padded array
+#        x = np.array(x, dtype=dtype)
+#        r = x.shape[0]
+#        padded[:r] = x
+#        Y.append(padded)    
+#    
+#    # Concatenate along new dimension
+#    Y = np.stack(Y, axis=0)
+#
+#    return Y
 
 def get_attn_mask(X, seq_len, dtype=np.int32):
     
@@ -169,6 +208,9 @@ def get_attn_mask(X, seq_len, dtype=np.int32):
     
     return Y
 
+    
+
+
 def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
         max_len = None, 
         num_workers = 6, 
@@ -177,12 +219,20 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
 
     tok_idx_fill = -1
 
+    logging.info('='*72)
+    logging.info("Generating xfmr embeddings")
+    logging.info('='*72)
+
     # Get device
-    if device == None:
+    if device is None:
         device = get_device()
 
     # Load pre-trained model (weights)
+    logging.info('Loading xfmr...')
+    logging.info('xfmr_type:\t{}'.format(xfmr_type))
+    logging.info('xfmr_dir:\t{}'.format(xfmr_dir))
     model = get_model(xfmr_type, xfmr_dir)
+    logging.info('xfmr loaded')
     
     # Set model to evaluation mode (as opposed to train mode)
     model.eval()
@@ -192,7 +242,10 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
 
     # If token indices not provided, use all
     if tok_idx is None:
+        logging.info('No token indices provided, so outputting all word pieces')
         tok_idx = [list(range(0, len(sent))) for sent in word_piece_ids]
+    else:
+        logging.info('Token indices provided, so outputting subset of word pieces')
 
     # Get maximum length
     if max_len is None:
@@ -218,6 +271,9 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
                 batch_size=batch_size, 
                 shuffle = False, 
                 num_workers=num_workers)
+
+    # Create progress bar
+    pbar = tqdm(total=len(dataloader))
 
     # Loop on batches
     # Predict hidden states features for each layer
@@ -245,6 +301,18 @@ def get_embeddings(word_piece_ids, tok_idx, xfmr_type, xfmr_dir, \
             embed_seq = embed_seq[tok_idx_seq, :]
             
             embeddings.append(embed_seq)
+        
+        # Update progress bar
+        pbar.update()
+        
+    pbar.close()     
+    
+    
+    logging.info('XFMR embeddings generated:')
+    for i, y in enumerate(embeddings):
+        if i > 5:
+            break
+        logging.info('embed:\t{}'.format(y))
     
     return embeddings  
 

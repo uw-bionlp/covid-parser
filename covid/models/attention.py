@@ -21,9 +21,9 @@ from allennlp.modules.time_distributed import TimeDistributed
 from allennlp.nn import util
 
 
-from models.utils import loss_reduction
-from models.training import get_loss, cross_entropy_soft_labels
-from models.span_embedder import span_embed_agg
+from pytorch_models.utils import loss_reduction
+from pytorch_models.training import get_loss, cross_entropy_soft_labels
+from pytorch_models.span_embedder import span_embed_agg
 
 from tqdm import tqdm
 import numpy as np
@@ -342,8 +342,8 @@ class Attention(nn.Module):
         # Dot product attention
         if type_ == 'dot_product':
             self.encoder = DotProductAttention(normalize = normalize)
-            logging.warn('Attention - overriding vector size for dot product, setting to {}'.format(embed_size))        
-            logging.warn('Attention - Specified activation now used in dot-product attention: {}'.format(self.activation))        
+            logging.info('Attention - Overriding vector size for dot product, setting to {}'.format(embed_size))        
+            logging.info('Attention - Specified activation not used in dot-product attention: {}'.format(self.activation))        
             self.vector_size = embed_size
         # BiLinear Attention            
         elif type_ == 'bilinear':

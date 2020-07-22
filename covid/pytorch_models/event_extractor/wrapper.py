@@ -13,6 +13,7 @@ import copy
 import torch
 
 from corpus.event2 import EventScorer as Scorer
+from visualization.heat_map import heat_map_mult_weights
 from utils.misc import flatten
 from utils.misc import dict_to_list, list_to_dict
 from utils.misc import nested_dict_to_list, list_to_nested_dict
@@ -23,7 +24,7 @@ from utils.scoring import build_e2e
 from models.Base import Base
 
 
-from models.event_extractor.model import EventExtractor as Estimator
+from pytorch_models.event_extractor.model import EventExtractor as Estimator
 
 from constants import *
 
@@ -70,6 +71,7 @@ class EventExtractorWrapper(Base):
             model_type = 'Multi-task',
             descrip = 'Event extractor', 
             ) 
+
 
     #@Override
     def predict_sub_op(self, X, y=None, pass_true=False, **kwargs):

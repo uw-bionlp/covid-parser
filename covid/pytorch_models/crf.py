@@ -22,9 +22,9 @@ import math
 from collections import OrderedDict
 
 from corpus.event import BIO_to_span_seq
-from models.utils import create_mask
+from pytorch_models.utils import create_mask
 
-from models.utils import loss_reduction
+from pytorch_models.utils import loss_reduction
 
 from constants import *
 

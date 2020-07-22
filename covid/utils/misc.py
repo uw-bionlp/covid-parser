@@ -1,5 +1,4 @@
 import json
-import math
 import re
 
 MILLNAMES = ['',' K',' M',' B',' T']

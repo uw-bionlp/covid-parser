@@ -8,6 +8,7 @@ from constants import *
 
 from utils.misc import list_to_nested_dict, list_to_dict
 from utils.seq_prep import add_BIO_doc
+#from annotate.standoff_create import to_standoff_corpus, group_by_doc, to_standoff_doc
 from annotate.standoff_create import unmerge_entities, combine_seq, rename_entity
 
 

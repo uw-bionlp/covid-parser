@@ -1,4 +1,9 @@
+
+
+
 import torch
+#torch.backends.cudnn.enabled = False
+
 import torch.utils.data as data_utils
 import torch.autograd as autograd
 import torch.nn as nn
@@ -8,7 +13,7 @@ from torch.autograd import Variable
 from allennlp.nn import util
 from torch.nn.utils.clip_grad import clip_grad_norm_
 
-from pytorch_memlab import profile
+#from pytorch_memlab import profile
 from collections import OrderedDict
 import math
 from tensorboardX import SummaryWriter
@@ -20,21 +25,39 @@ from datetime import datetime
 from tqdm import tqdm
 import numpy as np
 import logging
+from tqdm import tqdm
 import joblib
 import math
 from functools import partial
 
-from models.crf import MultitaskCRF, MultitaskSpanExtractor, seq_tags_to_spans, multitask_seq_tags_to_spans
-from models.attention import MultitaskAttention, MultiHeadAttention
-from models.utils import create_mask, tensor_summary, create_Tensorboard_writer, batched_select, one_hot, get_predictions, get_device
-from models.recurrent import Recurrent
-from models.event_extractor.dataset import EventExtractorDataset, map_1D, export_idx, get_num_tags, span_maps, seq_maps
 
-from models.training import MultiTaskLoss, reduce_loss, get_loss
-from models.span_embedder import SpanEmbedder, span_embed_agg
-from models.span_scoring import SpanScorerGold, SpanScorerCRF, num_keep_from_one_hot, SpanScorerFFNN, span_pruner
-from models.argument_scoring import ArgumentScorerRule, ArgumentScorerGold, ArgumentScorerLearned, prune_arguments, distance_features
+from models.word2vec import get_w2v_embed
+from pytorch_models.crf import MultitaskCRF, MultitaskSpanExtractor
+from pytorch_models.attention import MultitaskAttention
+from pytorch_models.utils import create_mask, tensor_summary
+from pytorch_models.crf import seq_tags_to_spans, multitask_seq_tags_to_spans
+from pytorch_models.recurrent import Recurrent
+from pytorch_models.utils import create_Tensorboard_writer, batched_select
+from pytorch_models.event_extractor.dataset import EventExtractorDataset, map_1D, export_idx, get_num_tags, span_maps, seq_maps
 
+from pytorch_models.training import MultiTaskLoss, reduce_loss
+from pytorch_models.span_embedder import SpanEmbedder, span_embed_agg
+from pytorch_models.span_scoring import SpanScorerGold
+from pytorch_models.span_scoring import SpanScorerCRF, num_keep_from_one_hot
+
+#from pytorch_models.span_scoring import SpanScorerPrune
+from pytorch_models.span_scoring import SpanScorerFFNN
+from pytorch_models.span_scoring import span_pruner
+from pytorch_models.argument_scoring import ArgumentScorerGold
+from pytorch_models.argument_scoring import ArgumentScorerRule
+from pytorch_models.argument_scoring import ArgumentScorerLearned
+from pytorch_models.argument_scoring import prune_arguments
+from pytorch_models.argument_scoring import distance_features
+from pytorch_models.attention import MultiHeadAttention
+
+
+from pytorch_models.utils import one_hot, get_predictions, get_device
+from pytorch_models.training import get_loss
 
 from utils.misc import nested_dict_to_list, list_to_nested_dict
 from utils.timer import Timers
@@ -43,8 +66,13 @@ from utils.timer import Timers
 from constants import *
 
 
+
+
+
+
 def to_device(X, Y, mask, device):
 
+    
     X = X.to(device)   
     
     if Y is not None:
@@ -66,7 +94,10 @@ def argmax(vec):
     return idx
 
 
+
+
 def multitask_loss(loss, entity):
+    
     loss = [entities[entity] for _, entities in loss.items()]
     loss = torch.stack(loss).mean()
     return loss
@@ -91,6 +122,13 @@ def dict_sent_to_seq_feat(X, seq_len):
     X = sent_to_seq_feat(X, seq_len)
     
     return X
+
+
+
+
+
+
+
 
 
 def max_grad(parameters):
@@ -122,6 +160,14 @@ def from_arg_name(name):
 
 
 class EventExtractor(nn.Module):
+    '''
+    
+    
+    args:
+
+    '''
+
+
 
     def __init__(self, \
     
@@ -137,11 +183,12 @@ class EventExtractor(nn.Module):
         # Word embeddings
         X_includes_mask = False,
         use_xfmr = False, 
+        
         xfmr_type = None, 
         xfmr_dir = None,
+        
         word_embed_source = None, 
-        word_embed_path = None,
-       
+        word_embed_dir = None,
         
         # Recurrent layer
         rnn_type = 'lstm',
@@ -226,7 +273,10 @@ class EventExtractor(nn.Module):
         learning_rate = 0.005,
         grad_max_norm = 1,
         loss_reduction = 'sum',
-       
+
+        # Input processing
+        pad_start = True,
+        pad_end = True,       
         
         ):
         super(EventExtractor, self).__init__()
@@ -243,8 +293,11 @@ class EventExtractor(nn.Module):
         self.use_xfmr = use_xfmr  
         self.xfmr_type = xfmr_type
         self.xfmr_dir = xfmr_dir
+
+        # Word embeddings     
         self.word_embed_source = word_embed_source
-        self.word_embed_path = word_embed_path
+        self.word_embed_dir = word_embed_dir
+
        
         
         # Recurrent layer
@@ -334,6 +387,13 @@ class EventExtractor(nn.Module):
         self.span_scoring = span_scoring
         self.argument_scoring = argument_scoring
 
+
+        
+        # Input processing
+        self.pad_start = pad_start
+        self.pad_end = pad_end
+        
+        
         # Get number of tags        
         self.num_tags = get_num_tags(label_def)
 
@@ -341,7 +401,27 @@ class EventExtractor(nn.Module):
         self.label_to_id, self.id_to_label = span_maps(label_def)        
         self.seq_tag_to_id, self.id_to_seq_tag, self.tag_to_span_fn,  self.num_tags_seq, self.seq_tag_constraints \
                                 = seq_maps(self.id_to_label)
+        # Multi-task training objective
+        #keys_ = []
+        #for name, lab_def in self.label_def.items():
+        #    keys_.append(name)
+        #    if name != TRIGGER:
+        #        keys_.append(to_arg_name(name))
+        #self.mt_loss = MultiTaskLoss(keys_)
 
+
+        self.word_embed_dict = {}
+        if self.use_xfmr:
+            self.word_embed_dict['map'] = None    
+            self.word_embed_dict['matrix'] = None
+        else:
+                        
+            # Get word map and embedding matrix
+            self.word_embed_dict['map'], self.word_embed_dict['matrix'] = get_w2v_embed( \
+                        model_dir = self.word_embed_dir, 
+                        to_pytorch = True, 
+                        freeze = True)
+            
         '''
         Input layer
         '''
@@ -541,9 +621,32 @@ class EventExtractor(nn.Module):
                         hidden_dim = self.arg_hidden_size, 
                         activation = self.arg_activation,
                         dropout = self.arg_dropout)
-    #@profile                       
-    def forward(self, X, y, mask=None, decode_=True, span_map=None, verbose=False):
+                      
+    def forward(self, X, y, mask=None, decode_=True, span_map=None,
+            verbose=False):
+        '''
+        
+        
+        
+              
+        '''
         self.timers.start('forward')   
+
+        if verbose:
+            logging.info('')
+            logging.info('Input:')
+            logging.info('\tX:\t{}'.format(X.shape))
+            logging.info('\ty:')
+            for K, V in y.items():
+                if isinstance(V, dict):
+                    logging.info('\t\t{}'.format(K))
+                    for k, v in V.items():
+                        logging.info('\t\t\t{}:\t{}'.format(k, v.shape))
+                else:
+                    logging.info('\t\t{}:\t{}'.format(K, V.shape))
+            logging.info('\tmask:\t{}'.format(mask.shape))
+               
+
         
         '''
         Recurrent layer with normalization
@@ -552,6 +655,11 @@ class EventExtractor(nn.Module):
         self.timers.start('rnn')   
         H = self.rnn(X, mask)
         self.timers.stop('rnn')   
+    
+        if verbose:
+            logging.info('')
+            logging.info('Recurrent:')
+            logging.info('\tH:\t{}'.format(H.shape))
 
         '''
         Span embedding
@@ -564,7 +672,11 @@ class EventExtractor(nn.Module):
                             span_indices = y['span_indices'],
                             span_mask = y['span_mask'],
                             verbose = verbose)
+            if verbose:
+                logging.info('')
+                logging.info('Span embedding:\t{}'.format(span_embed.shape))
         else:
+             
             span_embed = OrderedDict()
             for k, embedder in self.embedder.items():
                 span_embed[k] = embedder( \
@@ -573,11 +685,21 @@ class EventExtractor(nn.Module):
                                 span_indices = y['span_indices'],
                                 span_mask = y['span_mask'],
                                 verbose = verbose)
+            if verbose:
+                logging.info('')
+                logging.info('Span embedding:')
+                for k, v in span_embed.items():
+                    logging.info('\t{}:\t{}'.format(k, v.shape))
         self.timers.stop('embedder')   
 
         '''
+        Loss
+        '''
+        
+        '''
         Span scoring
         '''
+        
         
         # Iterate over span types
         ind_alphas = OrderedDict()
@@ -588,6 +710,7 @@ class EventExtractor(nn.Module):
         num_keep = OrderedDict()
         self.timers.start('span scorer')   
         for k, span_scorer in self.span_scorer.items():
+
 
             num_keep[k] = None
 
@@ -605,12 +728,15 @@ class EventExtractor(nn.Module):
                 embed_tmp = span_embed if self.span_embed_single_embedder else span_embed[k]
             
             # Use gold span labels    
+            
             if self.span_scoring == SPAN_GOLD:            
-                span_logits[k] = span_scorer(labels = y['mention_labels'][k])                         
+                span_logits[k] = span_scorer( \
+                                    labels = y['mention_labels'][k])                         
                 num_keep[k] = num_keep_from_one_hot(X)
                 
             # Predict span labels using CRF
             elif self.span_scoring == SPAN_CRF:  
+                
                 span_logits[k],  span_loss[k] = span_scorer( \
                                         seq_tensor = H,
                                         seq_mask = mask,
@@ -632,6 +758,8 @@ class EventExtractor(nn.Module):
                                 span_labels = y['mention_labels'][k],
                                 seq_weights = y['indicator_weights'][k], 
                                 verbose = verbose)
+                                
+
                 else:
                     span_logits[k],  span_loss[k] = span_scorer( \
                                     embed = embed_tmp,
@@ -646,6 +774,22 @@ class EventExtractor(nn.Module):
 
         self.timers.stop('span scorer')   
         
+        if verbose:
+            logging.info('')
+            logging.info('Span scoring, all spans:')
+            logging.info('\t{}:\t\t{}'.format('span_indices', y['span_indices'].shape))
+            logging.info('\t{}:\t\t{}'.format('span_mask', y['span_mask'].shape))
+            logging.info('\tspan_embed')
+            if self.span_embed_single_embedder:
+                logging.info('\tspan_embed:\t{}'.format(span_embed.shape))
+            else:
+                for k, v in span_embed.items():
+                    logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            logging.info('\tspan_logits')
+            for k, v in span_logits.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+           
+
         '''
         Span pruning
         '''
@@ -677,6 +821,27 @@ class EventExtractor(nn.Module):
                 tensors = (se, span_logits[k], y['span_indices']), 
                 indices = top_k_idx[k])
         self.timers.stop('span pruner')   
+                    
+        if verbose:
+            logging.info('')
+            logging.info('Span scoring, top spans:')
+            logging.info('\ttop_k_idx')
+            for k, v in top_k_idx.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            logging.info('\tspan_scores_top')
+            for k, v in span_scores_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            logging.info('\tspan_mask_top')
+            for k, v in span_mask_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))                            
+            logging.info('\tspan_embed_top')
+            for k, v in span_embed_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            logging.info('\tspan_logits_top')
+            for k, v in span_logits_top .items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            for k, v in span_indices_top .items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
 
         '''
         Argument pruning
@@ -692,7 +857,16 @@ class EventExtractor(nn.Module):
                                 arg_indices_top  = top_k_idx[k],
                                 trig_mask_top = span_mask_top[TRIGGER], 
                                 arg_mask_top  = span_mask_top[k])
-        self.timers.stop('argument pruner')
+        self.timers.stop('argument pruner')   
+        if verbose:
+            logging.info('')
+            logging.info('Pruning:')
+            logging.info('\targ_labels_top:')
+            for k, v in arg_labels_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
+            logging.info('\targ_mask_top:')
+            for k, v in arg_mask_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
 
         '''
         Argument scoring
@@ -736,6 +910,7 @@ class EventExtractor(nn.Module):
                 else:
                     dist_feat = None
                 
+                
                 # Trigger and argument embeddings     
                 trig_embed = span_embed_top[TRIGGER]
                 arg_embed  = span_embed_top[k]
@@ -760,7 +935,13 @@ class EventExtractor(nn.Module):
             else:
                 raise ValueError("Invalid argument ID: {}".format( \
                                                           self.argument_scoring))
-        self.timers.stop('argument scorer')
+        self.timers.stop('argument scorer')   
+        if verbose:
+            logging.info('')
+            logging.info('Argument scoring:')
+            logging.info('\tArgument scores:')
+            for k, v in arg_logits_top.items():
+                logging.info('\t\t{}:\t{}'.format(k, v.shape))
 
         '''
         Gather results
@@ -778,84 +959,225 @@ class EventExtractor(nn.Module):
             loss['ind'] = ind_loss
         loss['span'] = span_loss
         loss['arg'] = arg_loss
-    
+        
+
         self.timers.stop('forward')    
         
         return (loss, y_out)
+        
 
-    def predict_fast(self, X, embedding_model, tokenizer_model, device=None, **kwargs):
+    def fit(self, X, y, mask=None, device=None):
+        '''
+        Train model
+        '''
+        self.timers.reset()
+        
+        logging.info('')
+        logging.info('='*72)
+        logging.info('='*72)
+        logging.info("Event extractor model - fit")
+        logging.info('='*72)
+        logging.info('='*72)
+        
+        # Get/set device
+        device = get_device(device)
+        self.to(device)
+
+        # Configure training mode
+        self.train()
+
+        # Print model summary
+        self.get_summary()
 
         # Create data set
         dataset = EventExtractorDataset( \
                                 X = X, 
-                                Y = None, 
-                                max_len = self.max_len, 
+                                Y = y, 
                                 label_def = self.label_def,
-                                use_xfmr = self.use_xfmr,
+                                word_embed_map = self.word_embed_dict['map'],                               
+                                word_embed_matrix = self.word_embed_dict['matrix'],
                                 xfmr_type = self.xfmr_type,
                                 xfmr_dir = self.xfmr_dir,
-                                word_embed = self.word_embed_path, 
+                                xfmr_device = device,                               
+                                use_xfmr = self.use_xfmr,
                                 max_span_width = self.max_span_width, 
                                 min_span_width = self.min_span_width,
                                 num_workers = self.num_workers,
-                                device = device,
-                                X_includes_mask = self.X_includes_mask,
-                                tokenizer_model = tokenizer_model,
-                                embedding_model = embedding_model)
-        
+                                max_len = self.max_len, 
+                                pad_start = self.pad_start, 
+                                pad_end = self.pad_end,                                
+                                X_includes_mask = self.X_includes_mask)
+
         # Create data loader
         dataloader = data_utils.DataLoader(dataset, \
                                 batch_size = self.batch_size, 
-                                shuffle = False, 
+                                shuffle = True, 
                                 num_workers = self.num_workers)
 
         # Set number of cores
         torch.set_num_threads(self.num_workers)
 
-        # Loop on mini-batches
-        events_by_sent = []
-        spans_by_sent = []
-        alphas = []
-        for i, (X_bat, y_bat, mask_bat) in enumerate(dataloader):
+        # Create optimizer
+        optimizer = optim.Adam(self.parameters(), \
+                                                lr = self.learning_rate)
 
-            X_bat, y_bat, mask_bat = to_device(X_bat, y_bat, mask_bat, device)
+        # Create logger        
+        self.writer = create_Tensorboard_writer( \
+                                    dir_ = self.log_dir, 
+                                    use_subfolder = self.log_subfolder)
 
-            # Push data through model
-            _, y_pred_bat = self( \
-                            X = X_bat, 
-                            y = y_bat, 
-                            mask = mask_bat,
-                            decode_ = True,
-                            span_map = dataset.span_map,
-                            verbose = i == 0)          
+        # Loop on epochs
+        pbar = tqdm(total=self.num_epochs)
+        j_bat = 0
 
-            # Decode tensor span results
-            spans_by_sent.extend(dataset.decode_spans( \
-                        scores = y_pred_bat['mention_scores'], 
-                        spans = y_pred_bat['mention_spans'],
-                        mask = y_pred_bat['span_mask'],
-                        prune_overlapping = self.prune_overlapping,
-                        verbose = i == 0))
+        self.timers.start('all epochs')
+        for j in range(self.num_epochs):
+            self.timers.start('epoch')
+                
+            loss_sep = OrderedDict()
+            loss_total = 0
+            grad_orig = 0
+            grad_clip = 0
+            grad_norm = 0
             
-            # Decode tensor event results
-            events_by_sent.extend(dataset.decode_events( \
-                        mention_scores = y_pred_bat['mention_scores'], 
-                        mention_spans = y_pred_bat['mention_spans'],
-                        mention_mask = y_pred_bat['span_mask'],
-                        arg_scores = y_pred_bat['arg_scores'],
-                        arg_mask = y_pred_bat['arg_mask'],
-                        prune_overlapping = self.prune_overlapping,
-                        verbose = i == 0))
+            # Loop on mini-batches
+            for i, (X_bat, y_bat, mask_bat) in enumerate(dataloader):
 
-        spans_by_doc = dataset.by_doc(spans_by_sent)
-        events_by_doc = dataset.by_doc(events_by_sent)
+                self.timers.start('batch')
+                
+                
+                # Reset gradients
+                self.timers.start('zero grad')
+                self.zero_grad()
+                self.timers.stop('zero grad')
+                
+                
+                X_bat, y_bat, mask_bat = to_device(X_bat, y_bat, mask_bat, device)
+                
+                # Push data through model
+                verbose = (i == 0) and (j == 0)
+                loss_bat, _ = self( \
+                                        X = X_bat, 
+                                        y = y_bat, 
+                                        mask = mask_bat,
+                                        decode_ = True,
+                                        span_map = dataset.span_map,
+                                        verbose = verbose)           
+                
+                
+                
+                # Only try to back proper if learning
+                if (self.span_scoring in [SPAN_CRF, SPAN_PRUNE]) or \
+                   (self.argument_scoring in [ARGUMENT_LEARNED]):
+                
+                    self.timers.start('back propogation')
+                    # Weight loss
+                    #loss_weighted, loss_coeff = self.mt_loss(loss_bat)
+
+                    # Backprop loss
+                    #loss_weighted.backward()
+                    
+                    loss_list = []                    
+                    for K, V in loss_bat.items():
+                        if K not in loss_sep:
+                            loss_sep[K] = 0
+                       
+                        for k, ls in V.items():
+                            loss_list.append(ls)
+                            loss_sep[K] += ls.item()
+                    
+                    if self.loss_reduction == 'sum':
+                        loss_reduce = torch.sum(torch.stack(loss_list))
+                    elif self.loss_reduction == 'mean':
+                        loss_reduce = torch.mean(torch.stack(loss_list))
+
+                    #loss_reduce = reduce_loss(loss_list, self.loss_reduction)
+                    
+                    
+                    
+                    loss_reduce.backward()
+
+                    # Get original maximum gradient, without clipping
+                    grad_orig = max(grad_orig, max_grad(self.parameters()))
+                    
+                    # Clip loss
+                    grad_norm += clip_grad_norm_(self.parameters(), \
+                                                         self.grad_max_norm)
+                    
+                    # Get clipped maximum gradient
+                    grad_clip = max(grad_clip, max_grad(self.parameters()))
+                    
+                    # Update
+                    optimizer.step()
+                
+                    # Total epoch loss                
+                    loss_total += loss_reduce.item()
+
+                    self.timers.stop('back propogation')
+                    
+                    
+                    # Write batch loss
+                    
+                    if self.writer is not None:
+                        self.timers.start('writer')
+                        self.writer.add_scalar('loss_batch', loss_reduce, j_bat)        
+                        self.writer.add_scalar('grad_orig', grad_orig, j_bat)        
+                        self.writer.add_scalar('grad_clip', grad_clip, j_bat)        
+                        self.timers.stop('writer')
+                    j_bat += 1
+
+                self.timers.stop('batch')
+
+            self.timers.stop('epoch')
+
+            # Average across batches
+            for k, ls in loss_sep.items():
+                loss_sep[k] = ls/(i+1)
+            loss_total = loss_total/(i+1)
+            grad_clip = grad_clip/(i+1)
+
+            msg = []
+            msg.append('epoch={}'.format(j))
+            msg.append('{}={:.1e}'.format('Total', loss_total))
+            for k, ls in loss_sep.items():
+                #msg.append('{}={:.1e}({:.0%})'.format(k, ls, loss_coeff[k]))
+                msg.append('{}={:.1e}'.format(k, ls))
+            msg = ", ".join(msg)          
+            
+              
+            pbar.set_description(desc=msg)
+            pbar.update()
+            
+
+
+            # https://github.com/lanpa/tensorboard-pytorch-examples/blob/master/imagenet/main.py
+            if self.writer is not None:
+                self.writer.add_scalar('loss_total', loss_total, j)        
+                for k, ls in loss_sep.items():
+                    self.writer.add_scalar('loss_{}'.format(k), ls, j)
+                #self.writer.add_scalar('max_grad_orig', grad_orig, j)         
+                #self.writer.add_scalar('max_grad_clip', grad_clip, j)         
+                #self.writer.add_scalar('grad_norm', grad_norm, j) 
         
-        return events_by_doc
+        self.timers.stop('all epochs')            
+                    
+        pbar.close()
+          
+        self.timers.save()
+        
+        return True
 
-    def predict(self, X, y=None, device=None, **kwargs):
+    def predict(self, X, y=None, device=None):
         '''
         Train multitask model
         '''
+        
+        logging.info('')
+        logging.info('='*72)
+        logging.info('='*72)
+        logging.info("Event extractor model - predict")
+        logging.info('='*72)
+        logging.info('='*72)
 
         device = get_device(device)
         self.to(device)
@@ -870,17 +1192,21 @@ class EventExtractor(nn.Module):
         dataset = EventExtractorDataset( \
                                 X = X, 
                                 Y = y, 
-                                max_len = self.max_len, 
                                 label_def = self.label_def,
-                                use_xfmr = self.use_xfmr,
+                                word_embed_map = self.word_embed_dict['map'],                               
+                                word_embed_matrix = self.word_embed_dict['matrix'],
                                 xfmr_type = self.xfmr_type,
                                 xfmr_dir = self.xfmr_dir,
-                                word_embed = self.word_embed_path, 
+                                xfmr_device = device,                               
+                                use_xfmr = self.use_xfmr,
                                 max_span_width = self.max_span_width, 
                                 min_span_width = self.min_span_width,
                                 num_workers = self.num_workers,
-                                device = device,
+                                max_len = self.max_len, 
+                                pad_start = self.pad_start, 
+                                pad_end = self.pad_end,                                
                                 X_includes_mask = self.X_includes_mask)
+
         
         # Create data loader
         dataloader = data_utils.DataLoader(dataset, \
@@ -892,6 +1218,12 @@ class EventExtractor(nn.Module):
         torch.set_num_threads(self.num_workers)
 
         # Loop on mini-batches
+        
+        use_pbar = logging.INFO >= logging.root.level
+        
+        if use_pbar:
+            total = int(sum([len(doc) for doc in X])/self.batch_size)+1
+            pbar = tqdm(total=total)
         events_by_sent = []
         spans_by_sent = []
         alphas = []
@@ -924,10 +1256,21 @@ class EventExtractor(nn.Module):
                         arg_scores = y_pred_bat['arg_scores'],
                         arg_mask = y_pred_bat['arg_mask'],
                         prune_overlapping = self.prune_overlapping,
+                        #overlaps = y_bat['span_overlaps'],
                         verbose = i == 0))
+
+            if use_pbar:
+                pbar.update()
+        if use_pbar:
+            pbar.close()
 
         spans_by_doc = dataset.by_doc(spans_by_sent)
         events_by_doc = dataset.by_doc(events_by_sent)
+        
+        
+        #return (spans_by_doc, events_by_doc)
+        #return zip(spans_by_doc, events_by_doc)
+        
         
         return events_by_doc
         

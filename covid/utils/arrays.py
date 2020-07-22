@@ -3,6 +3,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 
+
+
 def get_subset(X, idx):
     '''
     Get subset of X based on indices listed in idx

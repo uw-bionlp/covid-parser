@@ -18,10 +18,17 @@ from allennlp.modules.span_extractors import EndpointSpanExtractor
 from allennlp.modules import TimeDistributed, Pruner
 from allennlp.nn import util
 
-from models.utils import one_hot, get_activation_fn, map_dict_builder, one_hot, get_predictions, get_device, create_mask, map_dict_builder
-from models.training import get_loss
-from models.crf import BIO_to_span
+
+
+
+from pytorch_models.utils import one_hot, get_activation_fn
+from pytorch_models.utils import map_dict_builder
+from pytorch_models.utils import create_mask, map_dict_builder
+from pytorch_models.training import get_loss
+from pytorch_models.crf import BIO_to_span
 from pytorch_memlab import profile
+from pytorch_models.utils import one_hot, get_predictions, get_device
+
 
 from constants import *
 

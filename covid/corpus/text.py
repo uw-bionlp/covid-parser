@@ -35,6 +35,9 @@ DT = [ \
 
 NOT_SECTIONS = '^[ \t]*(' + '|'.join(DT) + ')[ \t]*:'
 
+# Default heading pattern for target matches any section
+#HEAD_PAT_TARGET = '.'
+
 # Pattern for numbered lists
 
 SOCIAL_PAT = '^[ \t]*((other|past|pertinent)? *(family\/|pertinent)? *(social|soc) *(and)? *(family)? *(history|hx)? *(details)?|shx?|sochx?|habits?)[ \t]*:'
@@ -87,9 +90,84 @@ SECTION_MAP = [ \
     ('^[ \t]*(injuries)[ \t]*:', INJURIES),    
     ('^[ \t]*(issues)[ \t]*:', ISSUES),        
     ('^[ \t]*(constitutional *(symptoms)?)[ \t]*:', CONST),
+
+    
     ]
 
 SECTION_START = 'START'
+
+#def comp_text(text, encoding="ascii"):
+def comp_text(text, encoding=ENCODING):    
+    
+    return  zlib.compress(text.encode(encoding)) 
+
+def decomp_text(text, encoding=ENCODING):
+    return zlib.decompress(text).decode(encoding) 
+
+
+def comp_indices(indices):
+    return zlib.compress(pickle.dumps(indices))
+    
+def decomp_indices(indices):    
+    return pickle.loads(zlib.decompress(indices))
+
+
+
+def normalize_token(tok, norm_pat, norm_map):
+    '''
+    Normalize single token
+    '''
+
+    # Look for normalization pattern
+    match = re.search(norm_pat, tok, flags=re.IGNORECASE)
+    
+    # Normalization pattern found
+    if match:
+        
+        # Loop on normalization mapping until found
+        found = False 
+        for orig, new_ in norm_map:
+
+            # Look for match                                   
+            submatch = re.search(orig, tok, flags=re.IGNORECASE)
+            
+            # Map found
+            if submatch:
+                
+                # Normalize token
+                tok = tok.replace(submatch.group(0), new_)
+                
+                # Flag pattern as found and break
+                found = True 
+                break
+                
+        # Make sure normalization mapping found
+        assert found, "Could not find normalization mapping"    
+
+    return tok
+
+
+def normalize_doc(doc, norm_pat, norm_map):
+    '''
+    Normalize document
+    '''    
+    
+    # Loop on sentences
+    new_doc = []
+    for sent in doc:
+        
+        # Loop on tokens and sentence
+        new_sent = []
+        for tok in sent:
+            
+            # Normalize token and append
+            new_tok = normalize_token(tok, norm_pat, norm_map)
+            new_sent.append(new_tok)
+    
+        new_doc.append(new_sent)
+       
+    return new_doc
+
 
 def wrap_sent(sent, max_seq_len):
 
@@ -114,6 +192,7 @@ def wrap_sentences(doc, max_seq_len):
     Wrap sentences
     '''
      
+    # Loop on tokenized sentences in document
     new_doc = []
     for sent in doc:
         new_doc.extend(wrap_sent(sent, max_seq_len))    
@@ -134,12 +213,57 @@ def get_indices(full_text, section_text, norm_pat=None, start=0):
     Get token indices
     '''
     # Tokenized document as list of list of string
-    section_tokens = tokenize_doc(section_text, norm_pat = norm_pat)
+    section_tokens = tokenize_doc(section_text, 
+        norm_pat = norm_pat)
     
     # Start and stop indices of tokens
+    #indices = get_char_indices(text, tokenized, subs=None)
     indices = align(full_text, section_tokens, start=start)
 
+    '''
+    print('='*72)
+    
+
+    print("Full text")
+    print('-'*72)
+    print(full_text)
+    print('-'*72)
+    
+
+    print("section text")
+    print('-'*72)
+    print(section_text)
+    print('-'*72)
+
+
+    print("Start")
+    print(start)
+    
+    print("section tokens")
+    print(section_tokens)
+
+
+    print("indices")
+    print(indices)
+
+
+    with open("A_fulltext.txt",'w') as f:
+        f.write(full_text)
+    with open("A_sectiontext.txt",'w') as f:
+        f.write(section_text)
+
+    with open("A_start.json",'w') as f:
+        json.dump(start, f)
+
+    with open("A_section_tokens.json",'w') as f:
+        json.dump(section_tokens, f)
+
+    with open("A_indices.json",'w') as f:
+        json.dump(indices, f)
+    '''        
+
     return indices
+
 
 
 def get_tokens(text, indices):
@@ -147,12 +271,22 @@ def get_tokens(text, indices):
     Extract tokens from text using character indices
     '''     
        
+    # Loop on indices by sentence
     document = []
     for sent_indices in indices:
+        
+        # Initialize tokenize sentence
         sent = []
+        
+        # Loop on indices by token
         for start, stop in sent_indices:
+
+            # Append to sentence
             sent.append(text[start:stop])
+        
+        # Append to document
         document.append(sent)
+
        
     return document
 
@@ -166,6 +300,12 @@ def get_substitutions(orig, norm, flatten=False):
         orig = [tok for sent in orig for tok in sent]
         norm = [tok for sent in norm for tok in sent]
     
+    # Check lengths
+    # orig_len = len(orig)
+    # norm_len = len(norm)
+    # assert orig_len == norm_len, \
+    #               "Length mismatch: {} vs {}".format(orig_len, norm_len)
+
     # Get all substitutions
     subs = [(o, n) for o, n in zip(orig, norm) if o != n]
 
@@ -180,6 +320,7 @@ def get_substitutions(orig, norm, flatten=False):
     return df
 
 
+
 def get_sections(note, \
                 section_generic = SECTION_GENERIC, 
                 not_sections = NOT_SECTIONS, 
@@ -191,6 +332,9 @@ def get_sections(note, \
     Parse document into sections
         note: document as string
     '''
+
+    # Check argument type
+    assert isinstance(note, str), 'Document must be a string'
 
     # Regular expressions for generic and target headings
     regex_generic = re.compile(section_generic, flags=re.IGNORECASE)
@@ -206,39 +350,52 @@ def get_sections(note, \
     lines = note.splitlines()
     
     # Find indices of headings
-    section_indices = []
+    section_line_indices = []
     section_names_orig = []
     section_names_norm = []
-    for i, text in enumerate(lines):
+    for i, line in enumerate(lines):
         
         # Search for section heading in line
-        section_match = regex_generic.match(text)
-        not_section_match = regex_not_sections.match(text)
+        section_match = regex_generic.match(line)
+        not_section_match = regex_not_sections.match(line)
+        
+        sections_empty = len(section_line_indices) == 0
+        line_non_blank = len(''.join(line.split())) > 0
         
         # If match found, get index and section name
         if section_match and not not_section_match:
 
             # Append index of current line
-            section_indices.append(i)     
+            section_line_indices.append(i)     
             
             # Append the name of current section     
             sect_name = section_match.group()
             section_names_orig.append(sect_name)
             for regex, n in regex_sections:
-                if regex.match(text):
+                if regex.match(line):
                     sect_name = n
                     break
             section_names_norm.append(sect_name)
+
+        # First non-blank line is NOT a section heading
+        # No sections found in current document AND 
+        # line is not blank
+        elif sections_empty and line_non_blank:
+        #elif (len(section_line_indices) == 0) and (not line.isspace()):
+            section_line_indices.append(i)
+            section_names_orig.append(SECTION_START)
+            section_names_norm.append(SECTION_START)            
             
             
     # Include first line, if not included
-    if 0 not in section_indices:
-        section_indices.insert(0, 0)
-        section_names_orig.insert(0, SECTION_START)
-        section_names_norm.insert(0, SECTION_START)
+    #if 0 not in section_line_indices:
+    #    section_line_indices.insert(0, 0)
+    #    section_names_orig.insert(0, SECTION_START)
+    #    section_names_norm.insert(0, SECTION_START)
+
 
     # Start and stop indices for section    
-    start = section_indices[:]
+    start = section_line_indices[:]
     stop = start[1:] + [len(lines)]
     
     # Loop on sections
@@ -258,17 +415,67 @@ def get_sections(note, \
         note_text.append(section_text)
         
         # Section token indices
-        section_indices = get_indices(note, section_text, norm_pat, start=start_char)
-        start_char = section_indices[-1][-1][1]
-        note_indices.extend(section_indices)
+        section_token_indices = get_indices(note, section_text, norm_pat, start=start_char)
+        
+        #print('section_token_indices')
+        #print(section_token_indices)
+        if len(section_token_indices) > 0:
+       
+            if len(section_token_indices[-1]) > 0:
+
+                if len(section_token_indices[-1][-1]) > 0:
+                    pass
+                else:
+                    print('missing 2')
+                    print('='*72)
+                    print('section_line_indices', section_line_indices)
+                    print('st sp', (st, sp))
+                    print('section_text', '''"{}"'''.format(section_text))
+                    print('section_token_indices', section_token_indices)        
+                    for k in range(st, sp):
+                        print(k, lines[k])
+                    print('='*72)
+                    
+
+            else:
+                print('missing 1')
+                print('='*72)
+                print('st sp', (st, sp))
+                print('section_text', '''"{}"'''.format(section_text))
+                print('section_token_indices', section_token_indices)        
+                for k in range(st, sp):
+                    print(k, lines[k])
+                print('='*72)
+
+        else:
+            print('missing 0')
+            print('='*72)
+            print('st sp', (st, sp))
+            print('section_text', '''"{}"'''.format(section_text))
+            print('section_token_indices', section_token_indices)        
+            for k in range(st, sp):
+                print(k, lines[k])
+            print('='*72)
+        
+        #print('='*72)
+        #print('st sp', (st, sp))
+        #print('section_text', '''"{}"'''.format(section_text))
+        #print('section_token_indices', section_token_indices)        
+        #for k in range(st, sp):
+        #    print(k, lines[k])
+        #print('='*72)
+        
+        start_char = section_token_indices[-1][-1][1]
+        note_indices.extend(section_token_indices)
         
         # Section names by sentence
-        note_sections_orig.extend([name_orig]*len(section_indices))
-        note_sections_norm.extend([name_norm]*len(section_indices))
+        note_sections_orig.extend([name_orig]*len(section_token_indices))
+        note_sections_norm.extend([name_norm]*len(section_token_indices))
     
     # Check extraction of sections
     orig = ''.join(note.split())
     new_ = ''.join("".join(note_text).split())
+  
   
     assert orig == new_, \
         '''error in extracting sections
@@ -276,7 +483,8 @@ def get_sections(note, \
                 char length sectioned = {}
         '''.format(len(orig), len(new_))
     
-    from_idx = ''.join([note[idx[0]:idx[1]] for sent_idxs in note_indices for idx in sent_idxs])                            
+    from_idx = ''.join([note[idx[0]:idx[1]] \
+                    for sent_idxs in note_indices for idx in sent_idxs])                            
     from_idx = ''.join(from_idx.split())
     assert orig == from_idx, \
         '''error in extracting token indices
@@ -290,6 +498,7 @@ def get_sections(note, \
     assert len(note_indices) == len(note_sections_norm), 'length mismatch'
 
     return (note_indices, note_sections_norm, note_sections_orig)
+    
 
 
 def rm_linebreaks(doc, \
@@ -303,13 +512,16 @@ def rm_linebreaks(doc, \
     
     if (num_list_pat is None) and (section_pat is None) and (initial_cap_pat is None):
         new_doc = re.sub('\n', ' ', doc)
+        
+            
     else:
+        
         # Regular expression for matching numbered lists and
         # section headings       
         num_list_regex = re.compile(num_list_pat, flags=re.I)
         section_regex = re.compile(section_pat, flags=re.I)
         initial_cap_regex = re.compile(initial_cap_pat)
-
+        
         # Split into lines (not sentences)
         lines = doc.splitlines()
 
@@ -329,6 +541,7 @@ def rm_linebreaks(doc, \
             
         new_doc = "".join(new_doc)
 
+    
     return new_doc         
 
 def compare_dims(X, Y):

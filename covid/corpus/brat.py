@@ -15,11 +15,22 @@ from constants import *
 
 from corpus.tokenization import tokenize_doc
 
+
+
+
 COMMENT_RE = re.compile(r'^#')
 TEXTBOUND_RE = re.compile(r'^T\d+')
 EVENT_RE = re.compile(r'^E\d+\t')
 ATTRIBUTE_RE = re.compile(r'^A\d+\t')
+
+
+
+#ENTITY_MAP_LOAD = {'State': STATUS}
+#ENTITY_MAP_CREATE = {v:k for k, v in ENTITY_MAP_LOAD.items()}
 HAS_ATTR = [STATUS]
+
+
+
 
 class Attribute(object):
     '''

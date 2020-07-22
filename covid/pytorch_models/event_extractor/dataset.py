@@ -1,31 +1,31 @@
 
 import torch
+from pytorch_models.utils import create_mask, map_dict_builder
 from torch.utils.data import Dataset, DataLoader
+
+
+
 from collections import OrderedDict, Counter
 import logging
 import numpy as np
 import pandas as pd
+
 import copy
-
-# from models.multitask.dataset import preprocess_X 
-from models.multitask.dataset import preprocess_X_xfmr as preprocess_X 
-
-# __NIC_CHANGE__ 
-# Looks like change from: 
-#   https://github.com/Lybarger/clinical_extraction/commit/89789fdd00512c342c9c74d0b56027745ab56e7b#diff-2540aeb536f0160284ed24caf39fd81a
-
-
+from pytorch_models.multitask.dataset import preprocess_X_xfmr, preprocess_X_w2v
 from corpus.event import Event, Span, events2sent_labs, events2seq_tags
-from models.utils import pad_embedding_seq, trunc_seqs, map_dict_builder, pad1D, pad2D, create_mask, one_hot, \
-                         get_predictions, get_argument_pred, create_mask, map_dict_builder
+from pytorch_models.utils import pad_embedding_seq, trunc_seqs, map_dict_builder
+from pytorch_models.utils import pad1D, pad2D
 from corpus.labels import get_span_label
 from corpus.event import Event, Span
+from pytorch_models.utils import create_mask
 from constants import *
-from models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
+from pytorch_models.xfmrs import tokens2wordpiece, get_embeddings, embed_len_check
 from utils.misc import dict_to_list
-from models.span_scoring import filter_overlapping
+from pytorch_models.utils import one_hot, get_predictions, get_argument_pred
+from pytorch_models.span_scoring import filter_overlapping
 from sklearn.preprocessing import normalize
-from itertools import combinations_with_replacement as combos_with_replace, product
+from itertools import combinations_with_replacement as combos_with_replace
+from itertools import product
 
 from corpus.event import is_overlap
 
@@ -219,6 +219,53 @@ def seq_maps(span_id_to_labels):
     for name, seq2spn in seq_to_span.items():
         num_tags[name] = len(seq2spn)
 
+    logging.info('-'*72)
+    logging.info('Sequence tag-ID mapping')
+    logging.info('-'*72)
+
+    logging.info('')
+    logging.info('Span to Sequence map:')
+    for name, map_ in span_to_seq.items():
+        logging.info('')
+        logging.info(name)
+        for k, v in map_.items():
+            logging.info('{} --> {}'.format(k, v))
+
+    logging.info('')
+    logging.info('Sequence to Span map:')
+    for name, map_ in seq_to_span.items():
+        logging.info('')
+        logging.info(name)
+        for k, v in map_.items():
+            logging.info('{} --> {}'.format(k, v))
+
+    logging.info('')
+    logging.info('Num tags:')
+    for name, n in num_tags.items():
+        logging.info('{} = {}'.format(name, n))
+
+
+    logging.info('')    
+    logging.info('-'*72)
+    logging.info('Constraints:')
+    logging.info('-'*72)
+    for name, K in constraints.items():
+        logging.info('')
+        logging.info(name)
+        logging.info('{}'.format(K))
+
+    logging.info('')    
+    logging.info('-'*72)
+    logging.info('Exclusions:')
+    logging.info('-'*72)
+    for name, K in exclusions.items():
+        logging.info('')
+        logging.info(name)
+        logging.info('{}'.format(K))
+
+    logging.info('-'*72)
+    logging.info('Space reduction:')
+    logging.info('-'*72)
     for k in constraints:
         logging.info(k)
         c = len(constraints[k])
@@ -226,6 +273,12 @@ def seq_maps(span_id_to_labels):
         t = c + e
         r = float(c)/float(t)
         sr = r*r
+        logging.info('\tPermutation length:\t{}'.format(t))
+        logging.info('\tConstraint length:\t{}'.format(c))
+        logging.info('\tExclusions length:\t{}'.format(e))
+        logging.info('\tLinear ratio:\t\t{:.2f} ({}/{})'.format(r, c, t))
+        logging.info('\tSquared ratio:\t\t{:.2f}'.format(sr))
+
         
     return (span_to_seq, seq_to_span, tag_to_span_fn, num_tags, constraints)
     
@@ -305,6 +358,7 @@ def get_span_overlaps(span_indices):
     return span_overlaps
 
 
+
 def enumerate_spans(seq_length, \
             ignore_first = True, 
             ignore_last = True,
@@ -331,10 +385,16 @@ def enumerate_spans(seq_length, \
     # Start position
     if ignore_first:
         start = 1 
+        logging.info('Excluding spans with token position 0')
     else:
         start = 0
+        logging.info('Including spans with token position 0')
     
     # Adjust sequence length
+    if ignore_last:
+        logging.info('Excluding spans with last token position')
+    else:
+        logging.info('Including spans with last token position')
     seq_length = seq_length - int(ignore_last)
 
     # Iterate over token positions from start through max length    
@@ -365,6 +425,22 @@ def enumerate_spans(seq_length, \
     span_overlaps = get_span_overlaps(span_indices)
           
     cnt = 15
+    
+    logging.info('Total span count:\t{}'.format(num_spans))
+    logging.info('Minimum span index:\t{}'.format(min([s for s, e in span_indices])))
+    logging.info('Maximum span index:\t{}'.format(max([e for s, e in span_indices])))
+    logging.info('Span examples:\n{}{}{}'.format(span_indices[0:cnt], '.'*10, span_indices[-cnt:]))
+    logging.info('Span map:')
+    for j, (s, i) in enumerate(span_map.items()):
+        if (j < cnt) or (num_spans - j < cnt):
+            logging.info('\t{} --> {}'.format(s, i))
+    logging.info('Span mask:')
+    for j, (len_, msk) in enumerate(span_mask.items()):
+        if (j < cnt) or (len(span_mask) - j < cnt):
+            logging.info('\tseq len={} --> mask={}'.format(len_, msk))
+    logging.info('Span overlaps:\n{}'.format(span_overlaps))
+
+    
     return (span_indices, span_map, span_mask, num_spans, span_overlaps)
     
 
@@ -389,6 +465,7 @@ def get_indicators(events, label_to_id, max_len, pad_start=True):
     labels: list of span labels as tuple (span idx, label)
     
     '''
+    
     
     
     # Number of tags (labels)
@@ -492,6 +569,10 @@ def get_seq_labels(span_labels, span_map, span_to_seq, max_len):
     return seq_labels
 
 
+
+
+
+
 def get_mention_labels(events, span_map, label_to_id, pad_start):
     '''
     Get tensor representation for mention (e.g. trigger)
@@ -513,8 +594,8 @@ def get_mention_labels(events, span_map, label_to_id, pad_start):
     
     '''
     
-    assert isinstance(events, list)
-    assert isinstance(events[0], list)
+    assert isinstance(events, list), str(events)
+    assert isinstance(events[0], list), str(events)
     
     # Sentence count
     n_sent = len(events)
@@ -862,6 +943,7 @@ def tensor_dict_to_numpy(d):
 def get_ment_arg_pred(mention_scores, mention_spans, mention_mask, \
                         arg_scores, arg_mask, label_def, 
                         prune_overlapping=False, verbose=False):
+                        # overlaps=None, 
 
     # Get mention labels from scores and mask
     mention_labels = OrderedDict()
@@ -880,11 +962,21 @@ def get_ment_arg_pred(mention_scores, mention_spans, mention_mask, \
     # Get argument predictions
     arg_labels = OrderedDict()
     for name in arg_scores:
+        # (batch_size, num_trig, num_arg)
         arg_labels[name] = get_argument_pred( \
                                 span_pred = mention_labels[name], 
                                 arg_scores = arg_scores[name], 
                                 arg_mask = arg_mask[name],
                                 is_req = label_def[name][REQUIRED])
+
+    
+    if verbose:
+        logging.info('\tMention labels:')
+        for name, v in mention_labels.items():
+            logging.info('\t\t{}:\t{}'.format(name, v.shape))
+        logging.info('\tArgument labels:')
+        for name, v in arg_labels.items():
+            logging.info('\t\t{}:\t{}'.format(name, v.shape))
 
     # Convert to numpy arrays
     mention_labels  = tensor_dict_to_numpy(mention_labels)
@@ -938,13 +1030,31 @@ def Y_filt(Y, mask):
     if Y is None:
         return Y
     
+    #n_Y =    sum([len(y) for y in Y])
     n_Y =    len(Y)
     n_mask = sum([len(y) for y in mask])
     assert n_Y == n_mask, 'n_Y = {} vs. n_mask = {}'.format(n_Y, n_mask)
+    
 
     mask = [m for M in mask for m in M]
     len_check(Y, mask)
     Y_out = [y for y, m in zip(Y, mask) if m]
+
+    # Loop on documents
+    #len_check(Y, mask)
+    #Y_out = []
+    #for y_doc, m_doc in zip(Y, mask):
+    #    
+    #    # Create space for current doc
+    #    Y_out.append([])
+    #    
+    #    # Loop on sentences in current document
+    #    len_check(y_doc, m_doc)
+    #    for y_sent, m_sent in zip(y_doc, m_doc):
+    #        
+    #        # Include current sentence
+    #        if m_sent:
+    #            Y_out[-1].append(y_sent)
     
     return Y_out
     
@@ -955,46 +1065,59 @@ class EventExtractorDataset(Dataset):
     """
     
     
-    def __init__(self, X, Y, \
-            max_len = 30, 
-            label_def = None,         
-            use_xfmr = True,
-            xfmr_type = None,
-            xfmr_dir = None,
-            word_embed = None,
-            max_span_width = 8, 
-            min_span_width = 1,
-            num_workers = 6,
-            device = None,
-            X_includes_mask = False,
-            embedding_model = None, 
-            tokenizer_model = None
+    def __init__(self, X, Y, label_def, \
+        word_embed_map = None,
+        word_embed_matrix = None,
+        xfmr_type = None,
+        xfmr_dir = None,
+        xfmr_device = None,
+        use_xfmr = True,
+        num_workers = 6,
+        max_len = 30, 
+        pad_start = True, 
+        pad_end = True,        
+        max_span_width = 8, 
+        min_span_width = 1,       
+        X_includes_mask = False,
         ):
         super(EventExtractorDataset, self).__init__()
 
-        self.pad_start = True
-        self.pad_end = True
 
-        # Assign input attributes
-        self.max_len = max_len
+
+
+        logging.info('='*72)
+        logging.info('EventExtractorDataset')
+        logging.info('='*72)
+
         self.label_def = label_def
+
+
+
         self.use_xfmr = use_xfmr
-        self.xfmr_type = xfmr_type
-        self.xfmr_dir = xfmr_dir
-        self.word_embed = word_embed
+        
+        self.num_workers = num_workers
+        self.max_len = max_len
+        self.pad_start = pad_start
+        self.pad_end = pad_end
+
         self.max_span_width = max_span_width
         self.min_span_width = min_span_width
-        self.num_workers = num_workers
-        self.device = device
+        
+        #self.batch_size = batch_size
+        
         self.X_includes_mask = X_includes_mask
 
         # Get label to ID and ID to label maps
         self.label_to_id, self.id_to_label = span_maps(label_def)        
+        
         self.span_to_seq, _, _, _, _  = seq_maps(self.id_to_label)
+
 
         # Document count
         self.doc_count = len(X)    
+        logging.info('Document count:\t{}'.format(self.doc_count))
         seq_count = sum([len(x) for x in X]) 
+        logging.info('Sequence count, before filter:\t{}'.format(seq_count))
 
         # Sentence count, document indices, and sentence indices
         self.sent_counts = []
@@ -1002,29 +1125,47 @@ class EventExtractorDataset(Dataset):
             n = len(doc)
             self.sent_counts.append(n)
 
+
         # Preprocess labels (i.e. convert events to span labels)
         if Y is None:
             Y = [[[] for sent in doc] for doc in X]
 
+   
         X, self.sent_mask = X_filt(X, self.X_includes_mask)
-        self.seq_count = sum([len(x) for x in X])
-    
-        # Preprocess input (convert tokens to contextualized embeddings)
-        # __NIC_CHANGE__
-        self.tokens, X_, self.seq_lengths = preprocess_X( \
-                                X = X, 
-                                xfmr_type = self.xfmr_type,
-                                xfmr_dir = self.xfmr_dir,
-                                # use_xfmr = self.use_xfmr,
-                                max_len = self.max_len, 
-                                # pad_start = self.pad_start, 
-                                # pad_end = self.pad_end,
-                                num_workers = self.num_workers, 
-                                device = self.device)
+        
+        
 
-        assert len(X_) == self.seq_count        
+            
+        self.seq_count = sum([len(x) for x in X])
+        logging.info('Sequence count, after filter:\t{}'.format(self.seq_count))
+    
+
+
+        # Preprocess input (convert tokens to contextualized embeddings)
+        if use_xfmr:
+            self.tokens, self.X, self.seq_lengths = preprocess_X_xfmr( \
+                    X = X, 
+                    xfmr_type = xfmr_type,
+                    xfmr_dir = xfmr_dir,
+                    device = xfmr_device,
+                    max_len = self.max_len, 
+                    num_workers = self.num_workers,
+                    get_last = True,
+                    batch_size = 50,                   
+                    )
+
+        else:
+            self.tokens, self.X, self.seq_lengths = preprocess_X_w2v( \
+                    X = X, 
+                    embed_map = word_embed_map, 
+                    embed_matrix = word_embed_matrix,
+                    max_len = self.max_len, 
+                    pad_start = pad_start, 
+                    pad_end = pad_end)  
+
+        assert len(self.X) == self.seq_count        
         self.mask = create_mask(self.seq_lengths, self.max_len)   
-        self.X = X_ 
+
         
         # Get all spans
         # Start indices are inclusive
@@ -1036,19 +1177,34 @@ class EventExtractorDataset(Dataset):
                                  max_span_width = self.max_span_width, 
                                  min_span_width = self.min_span_width)
 
+
+        
+
         self.Y = self.preprocess_Y(Y, self.sent_mask)
+        #self.Y = Y_filt(Y, self.sent_mask)
+        #self.Y = self.tensorfy_Y(Y_labs)
+        #self.Y = Y_filt(self.Y, self.sent_mask)        
+        #self.label_dist()        
+
 
                     
     def __len__(self):
         return self.seq_count
         
     def __getitem__(self, index):
-        X = self.tensorfy_X(self.X[index])    
+        #X = self.tensorfy_X(self.X[index])     
+        
+
+        X = self.X[index]
+          
+        # X = self.X[index]
         Y = self.tensorfy_Y(self.Y[index], self.seq_lengths[index])        
+        #Y = self.Y[index]
         mask = self.mask[index]
         return (X, Y, mask)
 
-
+        
+        
     def preprocess_Y(self, Y, sent_mask=None):
         '''
         Extract labels from events
@@ -1081,10 +1237,17 @@ class EventExtractorDataset(Dataset):
         if sent_mask is None:
             sent_mask = [[1 for y_ in y] for y in Y]
 
+
+        logging.info('='*72)
+        logging.info('Preprocessing Y')
+        logging.info('='*72)
+
         # Iterate over documents
         labels = [] 
         len_check(Y, sent_mask)
         for events, msk in zip(Y, sent_mask):
+        
+
         
             # Get labels from events
             labs = preprocess_events( \
@@ -1110,13 +1273,24 @@ class EventExtractorDataset(Dataset):
 
     def tensorfy_Y(self, d, seq_len):
         
+        
+       
+        #assert len(labels) == len(self.seq_lengths)
+        #tensors = []
+        #for d, seq_len in zip(labels, self.seq_lengths):
+        
+
         g = OrderedDict()
         
         # Span indices as tensor
+        # (num_spans, 2)
         g['span_indices'] = torch.LongTensor(self.span_indices)
+        #g['span_midpoint'] = torch.round(torch.mean(torch.FloatTensor(self.span_indices), dim=-1)
         g['span_overlaps'] = torch.BoolTensor(self.span_overlaps)
         g['span_mask'] = torch.LongTensor(self.span_mask[seq_len])
         g['seq_length'] =  torch.LongTensor([seq_len]).squeeze()
+        
+        
        
         mention_labels = OrderedDict()
         for name, labels in d['mention_labels'].items():
@@ -1130,9 +1304,11 @@ class EventExtractorDataset(Dataset):
         for name, labels in d['indicator_weights'].items():
             indicator_weights[name] = torch.FloatTensor(labels)
 
+
         seq_labels = OrderedDict()
         for name, labels in d['seq_labels'].items():
             seq_labels[name] = torch.LongTensor(labels)
+
 
         arg_labels = OrderedDict()
         for name, labels in d['arg_labels'].items():
@@ -1144,7 +1320,15 @@ class EventExtractorDataset(Dataset):
         g['seq_labels'] = seq_labels
         g['arg_labels'] = arg_labels
         
-        return g 
+        return g    
+        #    tensors.append(g)
+        
+        #return tensors
+
+        
+
+        
+        return g        
 
 
     def label_dist(self):
@@ -1154,9 +1338,13 @@ class EventExtractorDataset(Dataset):
         mention_counter = Counter()
         arg_counter = Counter()
         for seq_len, y in zip(self.seq_lengths, self.Y):
+            
             yt = self.tensorfy_Y(y, seq_len)
+            
+            
             for k in yt['mention_labels']:
                 labs = yt['mention_labels'][k].numpy()
+                #mask = yt['span_mask'][k].numpy()
                 mask = yt['span_mask'].numpy()
                 labs = (labs*mask).flatten()
                 labs = labs[labs != 0]
@@ -1165,8 +1353,11 @@ class EventExtractorDataset(Dataset):
                     mention_counter[(k, lb)] += 1
                     
 
+
             for k in yt['arg_labels']:
                 labs = yt['arg_labels'][k].numpy()
+                #mask = yt['arg_mask'][k].numpy()
+                #mask = yt['arg_mask'].numpy()
                 mask = mask_2D(yt['span_mask'], yt['span_mask']).numpy()
                 
                 
@@ -1178,9 +1369,11 @@ class EventExtractorDataset(Dataset):
 
         df = pd.DataFrame.from_dict(mention_counter, orient='index').reset_index()    
         df = df.rename(columns={'index':'event', 0:'count'})
+        logging.info('Mention counts:\n{}'.format(df))
 
         df = pd.DataFrame.from_dict(arg_counter, orient='index').reset_index()    
         df = df.rename(columns={'index':'event', 0:'count'})
+        logging.info('Arguent counts:\n{}'.format(df))
             
         return df
             
@@ -1206,6 +1399,13 @@ class EventExtractorDataset(Dataset):
         
         '''
 
+        if verbose:
+            logging.info('')
+            logging.info('-'*72)
+            logging.info('Decode spans: ')
+            logging.info('-'*72)
+
+
         if prune_overlapping:
             for name in scores:
                 scores[name] = filter_overlapping( \
@@ -1221,12 +1421,21 @@ class EventExtractorDataset(Dataset):
         for name in scores:
 
             # Predictions and span indices
+            # (batch_size, num_spans, num_tag)
             scores_batch = scores[name]
+            # (batch_size, num_spans)
             mask_batch = mask[name]
             labs_batch = get_predictions(scores_batch, mask_batch).cpu().numpy()
 
             # (batch_size, num_spans, 2)
             spans_batch = spans[name].cpu().numpy()
+
+            if verbose:
+                logging.info('\t{}'.format(name))
+                logging.info('\t\tscores tensor:\t{}'.format(scores_batch.shape))
+                logging.info('\t\tmask tensor:\t{}'.format(mask_batch.shape))
+                logging.info('\t\tlabs array:\t{}'.format(labs_batch.shape))                      
+                logging.info('\t\tspans array:\t{}'.format(spans_batch.shape))
 
             # Iterate over sequences in batch
             for i, (labs_seq, spans_seq) in enumerate(zip(labs_batch, spans_batch)):
@@ -1254,6 +1463,7 @@ class EventExtractorDataset(Dataset):
 
     def decode_events(self, mention_scores, mention_spans, mention_mask, \
                             arg_scores, arg_mask, prune_overlapping=False, verbose=False):
+                                #  overlaps=None,
 
 
         '''
@@ -1277,6 +1487,16 @@ class EventExtractorDataset(Dataset):
         '''
         Predictions
         '''        
+
+        if verbose:
+            logging.info('')
+            logging.info('-'*72)
+            logging.info('Decode events: ')
+            logging.info('-'*72)
+            
+            
+            
+
             
         # Get mention and argument label predictions
         mention_labels, arg_labels = get_ment_arg_pred( \
@@ -1298,6 +1518,10 @@ class EventExtractorDataset(Dataset):
 
         # Dimensions of trigger
         seq_count, evt_count = trig_labels.shape
+        
+        if verbose:
+            logging.info('\tSequence count:\t{}'.format(seq_count))
+            logging.info('\tEvent counts:\t{}'.format(evt_count))
         
         # Loop on sentences in batch
         events = []
@@ -1420,3 +1644,196 @@ class EventExtractorDataset(Dataset):
                         Y_by_doc[i][j].append(y)
 
         return Y_by_doc
+'''
+def seq_maps(span_id_to_labels):
+    
+    id_to_lab = OrderedDict()
+    for name, map_ in span_id_to_labels.items():
+        
+        n = len(map_)
+        n_pos = n - 1
+
+        d = OrderedDict()
+        for id_, lab in map_.items():
+            d[id_] = lab
+        
+        for id_, lab in map_.items():
+            if id_ != 0:
+                d[id_ + n_pos] = lab
+        
+        id_to_lab[name] = d
+
+    lab_to_id = OrderedDict()
+    for name, map_ in span_id_to_labels.items():
+
+        n = len(map_)
+        n_pos = n - 1
+        
+        d = OrderedDict()
+        for id_, lab in map_.items():
+            if id_ == 0:
+                d[lab] = (id_, id_)
+            else:
+                d[lab] = (id_, id_ + n_pos)
+        
+        lab_to_id[name] = d
+
+
+    id_to_id = OrderedDict()
+    for name, map_ in span_id_to_labels.items():
+
+        n = len(map_)
+        n_pos = n - 1
+        
+        d = OrderedDict()
+        for id_, lab in map_.items():
+            d[id_]         = (id_, id_)
+            d[id_ + n_pos] = (id_, id_ + n_pos)
+        
+        id_to_id[name] = d
+
+        
+    constraints = OrderedDict()
+    exclusions = OrderedDict()
+    for name, map_ in id_to_lab.items():
+
+        n = len(lab_to_id[name])
+        n_pos = n - 1
+               
+        # all_combos = list(combos_with_replace(list(map_.keys()), 2))
+        all_perm = list(product(list(map_.keys()), repeat=2))
+        
+        
+        
+        BI_trans = set([fs for _, fs in lab_to_id[name].items() if fs != (0,0)])
+        Bs = set([f for _, (f, s) in lab_to_id[name].items() if f != 0])
+        
+        c = []
+        e = []
+        for f, s in all_perm:
+        
+            # No change in state
+            no_change = f == s
+        
+            # Transition from BEGIN
+            to_begin = s in Bs
+            
+            # Transition to OUTSIDE
+            to_outside = s == 0
+            
+            # Transition from BEGIN to INSIDE
+            begin_to_inside = (f, s) in BI_trans
+        
+        
+            if no_change or to_begin or to_outside or \
+                  begin_to_inside:
+                c.append((f, s))    
+            else:
+                e.append((f, s))            
+
+        constraints[name] = c
+        exclusions[name] = e
+
+
+    tag_to_span_fn = OrderedDict()
+    for name, map_ in lab_to_id.items():
+        O = set()
+        B = set()
+        I = set()
+        id_map = {}
+        for lab, (f, s) in map_.items():
+            if f == 0:
+                O.add(f)
+            else:
+                B.add(f)
+                I.add(s)
+            id_map[f] = f
+            id_map[s] = f
+                
+        def tag2span(tag, O=O, B=B, I=I, id_map=id_map):
+            is_O = tag in O
+            is_B = tag in B
+            is_I = tag in I            
+            lab = id_map[tag]
+        
+            return (lab, is_O, is_B, is_I)
+    
+        tag_to_span_fn[name] = tag2span
+
+    num_tags = OrderedDict()
+    for name, map_ in id_to_lab.items():
+        num_tags[name] = len(map_)
+
+    logging.info('-'*72)
+    logging.info('Sequence tag-ID mapping')
+    logging.info('-'*72)
+
+    logging.info('')
+    logging.info('Label to id map:')
+    for name, map_ in lab_to_id.items():
+        logging.info('')
+        logging.info(name)
+        for k, v in map_.items():
+            logging.info('{} --> {}'.format(k, v))
+
+    logging.info('')
+    logging.info('Id to label map:')
+    for name, map_ in id_to_lab.items():
+        logging.info('')
+        logging.info(name)
+        for k, v in map_.items():
+            logging.info('{} --> {}'.format(k, v))
+
+    logging.info('')
+    logging.info('Num tags:')
+    for name, n in num_tags.items():
+        logging.info('{} = {}'.format(name, n))
+
+    logging.info('')
+    logging.info('Id to Id map:')
+    for name, map_ in id_to_id.items():
+        logging.info('')
+        logging.info(name)
+        for k, v in map_.items():
+            logging.info('{} --> {}'.format(k, v))
+
+
+
+    logging.info('')    
+    logging.info('-'*72)
+    logging.info('Constraints:')
+    logging.info('-'*72)
+    for name, K in constraints.items():
+        logging.info('')
+        logging.info(name)
+        for k in K:
+            logging.info('{}'.format(k))
+
+    logging.info('')    
+    logging.info('-'*72)
+    logging.info('Exclusions:')
+    logging.info('-'*72)
+    for name, K in exclusions.items():
+        logging.info('')
+        logging.info(name)
+        for k in K:
+            logging.info('{}'.format(k))
+
+    logging.info('-'*72)
+    logging.info('Space reduction:')
+    logging.info('-'*72)
+    for k in constraints:
+        logging.info(k)
+        c = len(constraints[k])
+        e = len(exclusions[k])
+        t = c + e
+        r = float(c)/float(t)
+        sr = r*r
+        logging.info('\tPermutation length:\t{}'.format(t))
+        logging.info('\tConstraint length:\t{}'.format(c))
+        logging.info('\tExclusions length:\t{}'.format(e))
+        logging.info('\tLinear ratio:\t\t{:.2f} ({}/{})'.format(r, c, t))
+        logging.info('\tSquared ratio:\t\t{:.2f}'.format(sr))
+        
+    return (lab_to_id, id_to_lab, tag_to_span_fn, num_tags, constraints)
+'''        

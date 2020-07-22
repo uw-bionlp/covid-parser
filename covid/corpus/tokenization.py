@@ -1,8 +1,7 @@
-import nltk
+
+
 from nltk.tokenize import sent_tokenize
 from nltk.tokenize import word_tokenize
-nltk.download('punkt')
-
 import re
 import regex
 from collections import namedtuple

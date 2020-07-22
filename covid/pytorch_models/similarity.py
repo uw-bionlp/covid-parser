@@ -15,7 +15,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
-from models.utils import get_device
+from pytorch_models.utils import get_device
 
 def normalize_embed(X):
     '''
