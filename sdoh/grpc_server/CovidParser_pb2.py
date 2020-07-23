@@ -18,35 +18,40 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='covid.parser',
   syntax='proto3',
   serialized_options=b'\n\036edu.uw.bhi.bionlp.covid.parser',
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x11\x43ovidParser.proto\x12\x0c\x63ovid.parser\"&\n\nCovidInput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"\x1b\n\x0b\x43ovidOutput\x12\x0c\n\x04json\x18\x01 \x01(\t\"2\n\x16SentenceDetectionInput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"n\n\x17SentenceDetectionOutput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12)\n\tsentences\x18\x03 \x03(\x0b\x32\x16.covid.parser.Sentence\x12\x0e\n\x06\x65rrors\x18\x04 \x03(\t\"]\n\x0cMetaMapInput\x12\n\n\x02id\x18\x01 \x01(\t\x12)\n\tsentences\x18\x02 \x03(\x0b\x32\x16.covid.parser.Sentence\x12\x16\n\x0esemantic_types\x18\x03 \x03(\t\"\xec\x01\n\x0eMetaMapConcept\x12\x0b\n\x03\x63ui\x18\x01 \x01(\t\x12\x14\n\x0c\x63oncept_name\x18\x02 \x01(\t\x12\x15\n\rsource_phrase\x18\x03 \x01(\t\x12\x16\n\x0esemantic_types\x18\x04 \x03(\t\x12\x1d\n\x15\x62\x65gin_sent_char_index\x18\x05 \x01(\x05\x12\x1b\n\x13\x65nd_sent_char_index\x18\x06 \x01(\x05\x12\x1c\n\x14\x62\x65gin_doc_char_index\x18\x07 \x01(\x05\x12\x1a\n\x12\x65nd_doc_char_index\x18\x08 \x01(\x05\x12\x12\n\nprediction\x18\t \x01(\t\"\x8d\x01\n\x0fMetaMapSentence\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x18\n\x10\x62\x65gin_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\x12\x0c\n\x04text\x18\x04 \x01(\t\x12.\n\x08\x63oncepts\x18\x05 \x03(\x0b\x32\x1c.covid.parser.MetaMapConcept\"]\n\rMetaMapOutput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x30\n\tsentences\x18\x02 \x03(\x0b\x32\x1d.covid.parser.MetaMapSentence\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\"V\n\x08Sentence\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x18\n\x10\x62\x65gin_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\x12\x0c\n\x04text\x18\x04 \x01(\t\"Z\n\x18\x41ssertionClassifierInput\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x18\n\x10start_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\">\n\x19\x41ssertionClassifierOutput\x12\x12\n\nprediction\x18\x01 \x01(\t\x12\r\n\x05\x65rror\x18\x02 \x01(\t2G\n\x05\x43ovid\x12>\n\x07Predict\x12\x18.covid.parser.CovidInput\x1a\x19.covid.parser.CovidOutput2i\n\x07OpenNLP\x12^\n\x0f\x44\x65tectSentences\x12$.covid.parser.SentenceDetectionInput\x1a%.covid.parser.SentenceDetectionOutput2Z\n\x07MetaMap\x12O\n\x14\x45xtractNamedEntities\x12\x1a.covid.parser.MetaMapInput\x1a\x1b.covid.parser.MetaMapOutput2|\n\x13\x41ssertionClassifier\x12\x65\n\x10PredictAssertion\x12&.covid.parser.AssertionClassifierInput\x1a\'.covid.parser.AssertionClassifierOutput\"\x00\x42 \n\x1e\x65\x64u.uw.bhi.bionlp.covid.parserb\x06proto3'
+  serialized_pb=b'\n\x11\x43ovidParser.proto\x12\x0c\x63ovid.parser\";\n\x0fPredictionInput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65vice\x18\x03 \x01(\x05\"R\n\x10PredictionOutput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x32\n\x0bpredictions\x18\x02 \x03(\x0b\x32\x1d.covid.parser.PredictionEvent\"\x96\x01\n\x0fPredictionEvent\x12\x13\n\x0b\x65ntity_type\x18\x01 \x01(\t\x12\x13\n\x0bstatus_type\x18\x02 \x01(\t\x12\x11\n\ttrig_type\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x04 \x01(\t\x12\x38\n\targuments\x18\x05 \x03(\x0b\x32%.covid.parser.PredictionEventArgument\"\x8b\x01\n\x17PredictionEventArgument\x12\x11\n\tchar_idxs\x18\x01 \x03(\x05\x12\r\n\x05label\x18\x02 \x01(\t\x12\x10\n\x08sent_idx\x18\x03 \x01(\x05\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x10\n\x08tok_idxs\x18\x05 \x03(\x05\x12\x0e\n\x06tokens\x18\x06 \x03(\t\x12\x0c\n\x04type\x18\x07 \x01(\t\"2\n\x16SentenceDetectionInput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"n\n\x17SentenceDetectionOutput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12)\n\tsentences\x18\x03 \x03(\x0b\x32\x16.covid.parser.Sentence\x12\x0e\n\x06\x65rrors\x18\x04 \x03(\t\"]\n\x0cMetaMapInput\x12\n\n\x02id\x18\x01 \x01(\t\x12)\n\tsentences\x18\x02 \x03(\x0b\x32\x16.covid.parser.Sentence\x12\x16\n\x0esemantic_types\x18\x03 \x03(\t\"\xec\x01\n\x0eMetaMapConcept\x12\x0b\n\x03\x63ui\x18\x01 \x01(\t\x12\x14\n\x0c\x63oncept_name\x18\x02 \x01(\t\x12\x15\n\rsource_phrase\x18\x03 \x01(\t\x12\x16\n\x0esemantic_types\x18\x04 \x03(\t\x12\x1d\n\x15\x62\x65gin_sent_char_index\x18\x05 \x01(\x05\x12\x1b\n\x13\x65nd_sent_char_index\x18\x06 \x01(\x05\x12\x1c\n\x14\x62\x65gin_doc_char_index\x18\x07 \x01(\x05\x12\x1a\n\x12\x65nd_doc_char_index\x18\x08 \x01(\x05\x12\x12\n\nprediction\x18\t \x01(\t\"\x8d\x01\n\x0fMetaMapSentence\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x18\n\x10\x62\x65gin_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\x12\x0c\n\x04text\x18\x04 \x01(\t\x12.\n\x08\x63oncepts\x18\x05 \x03(\x0b\x32\x1c.covid.parser.MetaMapConcept\"]\n\rMetaMapOutput\x12\n\n\x02id\x18\x01 \x01(\t\x12\x30\n\tsentences\x18\x02 \x03(\x0b\x32\x1d.covid.parser.MetaMapSentence\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t\"V\n\x08Sentence\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x18\n\x10\x62\x65gin_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\x12\x0c\n\x04text\x18\x04 \x01(\t\"Z\n\x18\x41ssertionClassifierInput\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x18\n\x10start_char_index\x18\x02 \x01(\x05\x12\x16\n\x0e\x65nd_char_index\x18\x03 \x01(\x05\">\n\x19\x41ssertionClassifierOutput\x12\x12\n\nprediction\x18\x01 \x01(\t\x12\r\n\x05\x65rror\x18\x02 \x01(\t2Q\n\x05\x43ovid\x12H\n\x07Predict\x12\x1d.covid.parser.PredictionInput\x1a\x1e.covid.parser.PredictionOutput2P\n\x04SDoH\x12H\n\x07Predict\x12\x1d.covid.parser.PredictionInput\x1a\x1e.covid.parser.PredictionOutput2i\n\x07OpenNLP\x12^\n\x0f\x44\x65tectSentences\x12$.covid.parser.SentenceDetectionInput\x1a%.covid.parser.SentenceDetectionOutput2Z\n\x07MetaMap\x12O\n\x14\x45xtractNamedEntities\x12\x1a.covid.parser.MetaMapInput\x1a\x1b.covid.parser.MetaMapOutput2|\n\x13\x41ssertionClassifier\x12\x65\n\x10PredictAssertion\x12&.covid.parser.AssertionClassifierInput\x1a\'.covid.parser.AssertionClassifierOutput\"\x00\x42 \n\x1e\x65\x64u.uw.bhi.bionlp.covid.parserb\x06proto3'
 )
 
 
 
 
-_COVIDINPUT = _descriptor.Descriptor(
-  name='CovidInput',
-  full_name='covid.parser.CovidInput',
+_PREDICTIONINPUT = _descriptor.Descriptor(
+  name='PredictionInput',
+  full_name='covid.parser.PredictionInput',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='covid.parser.CovidInput.id', index=0,
+      name='id', full_name='covid.parser.PredictionInput.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='text', full_name='covid.parser.CovidInput.text', index=1,
+      name='text', full_name='covid.parser.PredictionInput.text', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='device', full_name='covid.parser.PredictionInput.device', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -60,25 +65,31 @@ _COVIDINPUT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=73,
+  serialized_end=94,
 )
 
 
-_COVIDOUTPUT = _descriptor.Descriptor(
-  name='CovidOutput',
-  full_name='covid.parser.CovidOutput',
+_PREDICTIONOUTPUT = _descriptor.Descriptor(
+  name='PredictionOutput',
+  full_name='covid.parser.PredictionOutput',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='json', full_name='covid.parser.CovidOutput.json', index=0,
+      name='id', full_name='covid.parser.PredictionOutput.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='predictions', full_name='covid.parser.PredictionOutput.predictions', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -91,8 +102,140 @@ _COVIDOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=75,
-  serialized_end=102,
+  serialized_start=96,
+  serialized_end=178,
+)
+
+
+_PREDICTIONEVENT = _descriptor.Descriptor(
+  name='PredictionEvent',
+  full_name='covid.parser.PredictionEvent',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='entity_type', full_name='covid.parser.PredictionEvent.entity_type', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='status_type', full_name='covid.parser.PredictionEvent.status_type', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='trig_type', full_name='covid.parser.PredictionEvent.trig_type', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='covid.parser.PredictionEvent.type', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='arguments', full_name='covid.parser.PredictionEvent.arguments', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=181,
+  serialized_end=331,
+)
+
+
+_PREDICTIONEVENTARGUMENT = _descriptor.Descriptor(
+  name='PredictionEventArgument',
+  full_name='covid.parser.PredictionEventArgument',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='char_idxs', full_name='covid.parser.PredictionEventArgument.char_idxs', index=0,
+      number=1, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='label', full_name='covid.parser.PredictionEventArgument.label', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sent_idx', full_name='covid.parser.PredictionEventArgument.sent_idx', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='text', full_name='covid.parser.PredictionEventArgument.text', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tok_idxs', full_name='covid.parser.PredictionEventArgument.tok_idxs', index=4,
+      number=5, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tokens', full_name='covid.parser.PredictionEventArgument.tokens', index=5,
+      number=6, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='covid.parser.PredictionEventArgument.type', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=334,
+  serialized_end=473,
 )
 
 
@@ -102,7 +245,6 @@ _SENTENCEDETECTIONINPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.SentenceDetectionInput.id', index=0,
@@ -110,14 +252,14 @@ _SENTENCEDETECTIONINPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='text', full_name='covid.parser.SentenceDetectionInput.text', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -130,8 +272,8 @@ _SENTENCEDETECTIONINPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=104,
-  serialized_end=154,
+  serialized_start=475,
+  serialized_end=525,
 )
 
 
@@ -141,7 +283,6 @@ _SENTENCEDETECTIONOUTPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.SentenceDetectionOutput.id', index=0,
@@ -149,28 +290,28 @@ _SENTENCEDETECTIONOUTPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='text', full_name='covid.parser.SentenceDetectionOutput.text', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sentences', full_name='covid.parser.SentenceDetectionOutput.sentences', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='errors', full_name='covid.parser.SentenceDetectionOutput.errors', index=3,
       number=4, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -183,8 +324,8 @@ _SENTENCEDETECTIONOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=156,
-  serialized_end=266,
+  serialized_start=527,
+  serialized_end=637,
 )
 
 
@@ -194,7 +335,6 @@ _METAMAPINPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.MetaMapInput.id', index=0,
@@ -202,21 +342,21 @@ _METAMAPINPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sentences', full_name='covid.parser.MetaMapInput.sentences', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='semantic_types', full_name='covid.parser.MetaMapInput.semantic_types', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -229,8 +369,8 @@ _METAMAPINPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=268,
-  serialized_end=361,
+  serialized_start=639,
+  serialized_end=732,
 )
 
 
@@ -240,7 +380,6 @@ _METAMAPCONCEPT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='cui', full_name='covid.parser.MetaMapConcept.cui', index=0,
@@ -248,63 +387,63 @@ _METAMAPCONCEPT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='concept_name', full_name='covid.parser.MetaMapConcept.concept_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='source_phrase', full_name='covid.parser.MetaMapConcept.source_phrase', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='semantic_types', full_name='covid.parser.MetaMapConcept.semantic_types', index=3,
       number=4, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='begin_sent_char_index', full_name='covid.parser.MetaMapConcept.begin_sent_char_index', index=4,
       number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='end_sent_char_index', full_name='covid.parser.MetaMapConcept.end_sent_char_index', index=5,
       number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='begin_doc_char_index', full_name='covid.parser.MetaMapConcept.begin_doc_char_index', index=6,
       number=7, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='end_doc_char_index', full_name='covid.parser.MetaMapConcept.end_doc_char_index', index=7,
       number=8, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prediction', full_name='covid.parser.MetaMapConcept.prediction', index=8,
       number=9, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -317,8 +456,8 @@ _METAMAPCONCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=364,
-  serialized_end=600,
+  serialized_start=735,
+  serialized_end=971,
 )
 
 
@@ -328,7 +467,6 @@ _METAMAPSENTENCE = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.MetaMapSentence.id', index=0,
@@ -336,35 +474,35 @@ _METAMAPSENTENCE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='begin_char_index', full_name='covid.parser.MetaMapSentence.begin_char_index', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='end_char_index', full_name='covid.parser.MetaMapSentence.end_char_index', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='text', full_name='covid.parser.MetaMapSentence.text', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='concepts', full_name='covid.parser.MetaMapSentence.concepts', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -377,8 +515,8 @@ _METAMAPSENTENCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=603,
-  serialized_end=744,
+  serialized_start=974,
+  serialized_end=1115,
 )
 
 
@@ -388,7 +526,6 @@ _METAMAPOUTPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.MetaMapOutput.id', index=0,
@@ -396,21 +533,21 @@ _METAMAPOUTPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sentences', full_name='covid.parser.MetaMapOutput.sentences', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='errors', full_name='covid.parser.MetaMapOutput.errors', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -423,8 +560,8 @@ _METAMAPOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=746,
-  serialized_end=839,
+  serialized_start=1117,
+  serialized_end=1210,
 )
 
 
@@ -434,7 +571,6 @@ _SENTENCE = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='covid.parser.Sentence.id', index=0,
@@ -442,28 +578,28 @@ _SENTENCE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='begin_char_index', full_name='covid.parser.Sentence.begin_char_index', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='end_char_index', full_name='covid.parser.Sentence.end_char_index', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='text', full_name='covid.parser.Sentence.text', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -476,8 +612,8 @@ _SENTENCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=841,
-  serialized_end=927,
+  serialized_start=1212,
+  serialized_end=1298,
 )
 
 
@@ -487,7 +623,6 @@ _ASSERTIONCLASSIFIERINPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='text', full_name='covid.parser.AssertionClassifierInput.text', index=0,
@@ -495,21 +630,21 @@ _ASSERTIONCLASSIFIERINPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='start_char_index', full_name='covid.parser.AssertionClassifierInput.start_char_index', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='end_char_index', full_name='covid.parser.AssertionClassifierInput.end_char_index', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -522,8 +657,8 @@ _ASSERTIONCLASSIFIERINPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=929,
-  serialized_end=1019,
+  serialized_start=1300,
+  serialized_end=1390,
 )
 
 
@@ -533,7 +668,6 @@ _ASSERTIONCLASSIFIEROUTPUT = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
-  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='prediction', full_name='covid.parser.AssertionClassifierOutput.prediction', index=0,
@@ -541,14 +675,14 @@ _ASSERTIONCLASSIFIEROUTPUT = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='error', full_name='covid.parser.AssertionClassifierOutput.error', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -561,16 +695,20 @@ _ASSERTIONCLASSIFIEROUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1021,
-  serialized_end=1083,
+  serialized_start=1392,
+  serialized_end=1454,
 )
 
+_PREDICTIONOUTPUT.fields_by_name['predictions'].message_type = _PREDICTIONEVENT
+_PREDICTIONEVENT.fields_by_name['arguments'].message_type = _PREDICTIONEVENTARGUMENT
 _SENTENCEDETECTIONOUTPUT.fields_by_name['sentences'].message_type = _SENTENCE
 _METAMAPINPUT.fields_by_name['sentences'].message_type = _SENTENCE
 _METAMAPSENTENCE.fields_by_name['concepts'].message_type = _METAMAPCONCEPT
 _METAMAPOUTPUT.fields_by_name['sentences'].message_type = _METAMAPSENTENCE
-DESCRIPTOR.message_types_by_name['CovidInput'] = _COVIDINPUT
-DESCRIPTOR.message_types_by_name['CovidOutput'] = _COVIDOUTPUT
+DESCRIPTOR.message_types_by_name['PredictionInput'] = _PREDICTIONINPUT
+DESCRIPTOR.message_types_by_name['PredictionOutput'] = _PREDICTIONOUTPUT
+DESCRIPTOR.message_types_by_name['PredictionEvent'] = _PREDICTIONEVENT
+DESCRIPTOR.message_types_by_name['PredictionEventArgument'] = _PREDICTIONEVENTARGUMENT
 DESCRIPTOR.message_types_by_name['SentenceDetectionInput'] = _SENTENCEDETECTIONINPUT
 DESCRIPTOR.message_types_by_name['SentenceDetectionOutput'] = _SENTENCEDETECTIONOUTPUT
 DESCRIPTOR.message_types_by_name['MetaMapInput'] = _METAMAPINPUT
@@ -582,19 +720,33 @@ DESCRIPTOR.message_types_by_name['AssertionClassifierInput'] = _ASSERTIONCLASSIF
 DESCRIPTOR.message_types_by_name['AssertionClassifierOutput'] = _ASSERTIONCLASSIFIEROUTPUT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-CovidInput = _reflection.GeneratedProtocolMessageType('CovidInput', (_message.Message,), {
-  'DESCRIPTOR' : _COVIDINPUT,
+PredictionInput = _reflection.GeneratedProtocolMessageType('PredictionInput', (_message.Message,), {
+  'DESCRIPTOR' : _PREDICTIONINPUT,
   '__module__' : 'CovidParser_pb2'
-  # @@protoc_insertion_point(class_scope:covid.parser.CovidInput)
+  # @@protoc_insertion_point(class_scope:covid.parser.PredictionInput)
   })
-_sym_db.RegisterMessage(CovidInput)
+_sym_db.RegisterMessage(PredictionInput)
 
-CovidOutput = _reflection.GeneratedProtocolMessageType('CovidOutput', (_message.Message,), {
-  'DESCRIPTOR' : _COVIDOUTPUT,
+PredictionOutput = _reflection.GeneratedProtocolMessageType('PredictionOutput', (_message.Message,), {
+  'DESCRIPTOR' : _PREDICTIONOUTPUT,
   '__module__' : 'CovidParser_pb2'
-  # @@protoc_insertion_point(class_scope:covid.parser.CovidOutput)
+  # @@protoc_insertion_point(class_scope:covid.parser.PredictionOutput)
   })
-_sym_db.RegisterMessage(CovidOutput)
+_sym_db.RegisterMessage(PredictionOutput)
+
+PredictionEvent = _reflection.GeneratedProtocolMessageType('PredictionEvent', (_message.Message,), {
+  'DESCRIPTOR' : _PREDICTIONEVENT,
+  '__module__' : 'CovidParser_pb2'
+  # @@protoc_insertion_point(class_scope:covid.parser.PredictionEvent)
+  })
+_sym_db.RegisterMessage(PredictionEvent)
+
+PredictionEventArgument = _reflection.GeneratedProtocolMessageType('PredictionEventArgument', (_message.Message,), {
+  'DESCRIPTOR' : _PREDICTIONEVENTARGUMENT,
+  '__module__' : 'CovidParser_pb2'
+  # @@protoc_insertion_point(class_scope:covid.parser.PredictionEventArgument)
+  })
+_sym_db.RegisterMessage(PredictionEventArgument)
 
 SentenceDetectionInput = _reflection.GeneratedProtocolMessageType('SentenceDetectionInput', (_message.Message,), {
   'DESCRIPTOR' : _SENTENCEDETECTIONINPUT,
@@ -668,19 +820,17 @@ _COVID = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1085,
-  serialized_end=1156,
+  serialized_start=1456,
+  serialized_end=1537,
   methods=[
   _descriptor.MethodDescriptor(
     name='Predict',
     full_name='covid.parser.Covid.Predict',
     index=0,
     containing_service=None,
-    input_type=_COVIDINPUT,
-    output_type=_COVIDOUTPUT,
+    input_type=_PREDICTIONINPUT,
+    output_type=_PREDICTIONOUTPUT,
     serialized_options=None,
-    create_key=_descriptor._internal_create_key,
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_COVID)
@@ -688,15 +838,38 @@ _sym_db.RegisterServiceDescriptor(_COVID)
 DESCRIPTOR.services_by_name['Covid'] = _COVID
 
 
+_SDOH = _descriptor.ServiceDescriptor(
+  name='SDoH',
+  full_name='covid.parser.SDoH',
+  file=DESCRIPTOR,
+  index=1,
+  serialized_options=None,
+  serialized_start=1539,
+  serialized_end=1619,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='Predict',
+    full_name='covid.parser.SDoH.Predict',
+    index=0,
+    containing_service=None,
+    input_type=_PREDICTIONINPUT,
+    output_type=_PREDICTIONOUTPUT,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_SDOH)
+
+DESCRIPTOR.services_by_name['SDoH'] = _SDOH
+
+
 _OPENNLP = _descriptor.ServiceDescriptor(
   name='OpenNLP',
   full_name='covid.parser.OpenNLP',
   file=DESCRIPTOR,
-  index=1,
+  index=2,
   serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1158,
-  serialized_end=1263,
+  serialized_start=1621,
+  serialized_end=1726,
   methods=[
   _descriptor.MethodDescriptor(
     name='DetectSentences',
@@ -706,7 +879,6 @@ _OPENNLP = _descriptor.ServiceDescriptor(
     input_type=_SENTENCEDETECTIONINPUT,
     output_type=_SENTENCEDETECTIONOUTPUT,
     serialized_options=None,
-    create_key=_descriptor._internal_create_key,
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_OPENNLP)
@@ -718,11 +890,10 @@ _METAMAP = _descriptor.ServiceDescriptor(
   name='MetaMap',
   full_name='covid.parser.MetaMap',
   file=DESCRIPTOR,
-  index=2,
+  index=3,
   serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1265,
-  serialized_end=1355,
+  serialized_start=1728,
+  serialized_end=1818,
   methods=[
   _descriptor.MethodDescriptor(
     name='ExtractNamedEntities',
@@ -732,7 +903,6 @@ _METAMAP = _descriptor.ServiceDescriptor(
     input_type=_METAMAPINPUT,
     output_type=_METAMAPOUTPUT,
     serialized_options=None,
-    create_key=_descriptor._internal_create_key,
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_METAMAP)
@@ -744,11 +914,10 @@ _ASSERTIONCLASSIFIER = _descriptor.ServiceDescriptor(
   name='AssertionClassifier',
   full_name='covid.parser.AssertionClassifier',
   file=DESCRIPTOR,
-  index=3,
+  index=4,
   serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1357,
-  serialized_end=1481,
+  serialized_start=1820,
+  serialized_end=1944,
   methods=[
   _descriptor.MethodDescriptor(
     name='PredictAssertion',
@@ -758,7 +927,6 @@ _ASSERTIONCLASSIFIER = _descriptor.ServiceDescriptor(
     input_type=_ASSERTIONCLASSIFIERINPUT,
     output_type=_ASSERTIONCLASSIFIEROUTPUT,
     serialized_options=None,
-    create_key=_descriptor._internal_create_key,
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_ASSERTIONCLASSIFIER)

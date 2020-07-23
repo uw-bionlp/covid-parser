@@ -9,16 +9,43 @@ option java_package = "edu.uw.bhi.bionlp.covid.parser";
  * COVID
  */ 
 service Covid {
-    rpc Predict (CovidInput) returns (CovidOutput);
+    rpc Predict (PredictionInput) returns (PredictionOutput);
 }
 
-message CovidInput {
+message PredictionInput {
     string id = 1;
     string text = 2;
+    int32 device = 3;
 }
 
-message CovidOutput {
-    string json = 1;
+message PredictionOutput {
+    string id = 1;
+    repeated PredictionEvent predictions = 2;
+}
+
+message PredictionEvent {
+    string entity_type = 1;
+    string status_type = 2;
+    string trig_type = 3;
+    string type = 4;
+    repeated PredictionEventArgument arguments = 5;
+}
+
+message PredictionEventArgument {
+    repeated int32 char_idxs = 1;
+    string label = 2;
+    int32 sent_idx = 3;
+    string text = 4;
+    repeated int32 tok_idxs = 5;
+    repeated string tokens = 6;
+    string type = 7;
+}
+
+/**
+ * Social Determinants of Health
+ */ 
+service SDoH {
+    rpc Predict (PredictionInput) returns (PredictionOutput);
 }
 
 /**

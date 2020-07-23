@@ -7,9 +7,9 @@ from grpc_server.CovidParser_pb2 import PredictionOutput, PredictionEvent, Predi
 class DocumentProcessor():
 
     def __init__(self):
-        self.model_dir      = os.path.join('model','covid')
+        self.model_dir      = os.path.join('model','sdoh')
         self.word_embed_dir = os.path.join('model','word2vec')
-        self.extractor      = Extractor('covid', self.model_dir, self.word_embed_dir)
+        self.extractor      = Extractor('sdoh', self.model_dir, self.word_embed_dir)
 
     def predict(self, text):
         prediction = self.extractor.predict(text, -1, 'obj')

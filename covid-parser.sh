@@ -26,7 +26,10 @@ def parse_args():
     parser.add_argument('-t', '--threads', help='Number of threads with which to execute processing in parallel. Defaults to one.', default=1, type=int)
     parser.add_argument('--metamap', help='Whether to parse with MetaMap or not. Defaults to false.', default=False, dest='metamap', action='store_true')
     parser.add_argument('--metamap_semantic_types', help="MetaMap semantic types to include (eg, 'sosy', 'fndg'). Defaults to all.", nargs='+')
-    parser.add_argument('--brat', help='Output BRAT-format annotation files, in addition to JSON.', default=False, dest='brat', action='store_true')
+    parser.add_argument('--covid', help='Whether to predict with the COVID prediction algortithm or not. Defaults to false.', default=False)
+    parser.add_argument('--sdoh', help='Whether to predict with the Social Determinants of Health prediction algortithm or not. Defaults to false.', default=False)
+    parser.add_argument('--gpu', help='Integer indicating GPU id to use, if available. Defaults to -1.', default=-1)
+    # parser.add_argument('--brat', help='Output BRAT-format annotation files, in addition to JSON.', default=False, dest='brat', action='store_true')
 
     try:
         args = parser.parse_args()

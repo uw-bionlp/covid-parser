@@ -1,12 +1,12 @@
-# docker build -t covid-parser -f $PWD/covid/Dockerfile $PWD/covid
-# docker run --name=covid-parser_1 -p 42450:8080 covid-parser
+# docker build -t sdoh-predictor -f $PWD/sdoh/Dockerfile $PWD/sdoh
+# docker run --name=sdoh-predictor_1 -p 42450:8080 sdoh-predictor
 
 FROM python:3.7 as build
 
 WORKDIR /usr/src/app
 
 # Copy code
-COPY main.py process.py dl_nltk_punkt.py constants.py requirements.txt /usr/src/app/
+COPY main.py process.py constants.py requirements.txt /usr/src/app/
 COPY grpc_server    /usr/src/app/grpc_server
 COPY annotate       /usr/src/app/annotate
 COPY corpus         /usr/src/app/corpus
@@ -19,7 +19,6 @@ COPY docker         /usr/src/app/docker
 COPY model          /usr/src/app/model
 
 # pip install
-RUN python3 -m pip install --no-cache-dir -r requirements.txt  && \
-    python3 dl_nltk_punkt.py
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 CMD [ "python", "./main.py" ]

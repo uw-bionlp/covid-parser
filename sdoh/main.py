@@ -3,11 +3,11 @@ from concurrent import futures
 import grpc
 import json
 
-from grpc_server.CovidParser_pb2_grpc import CovidServicer as BaseCovidServicer, add_CovidServicer_to_server
+from grpc_server.CovidParser_pb2_grpc import SDoHServicer, add_SDoHServicer_to_server
 
 from process import DocumentProcessor
 
-class CovidServicer(BaseCovidServicer):
+class Servicer(SDoHServicer):
 
     def __init__(self):
         self.processor = DocumentProcessor()
@@ -21,7 +21,7 @@ class CovidServicer(BaseCovidServicer):
         return prediction
 
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-add_CovidServicer_to_server(CovidServicer(), server)
+add_SDoHServicer_to_server(Servicer(), server)
 server.add_insecure_port('[::]:8080')
 server.start()
 server.wait_for_termination()

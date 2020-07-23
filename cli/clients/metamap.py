@@ -7,7 +7,6 @@ from copy import copy
 import threading
 
 lck = threading.Lock()
-sent_cache = {}
 
 def get_metamap_containers():
     return [ container for key, container in get_containers().items() if METAMAP in container.name ]
@@ -35,35 +34,7 @@ class MetaMapClient():
         self.semantic_types = args.metamap_semantic_types
 
     def process(self, doc):
-
-        # Check if each sentence seen before
-        global sent_cache
-        global lck
-        lck.acquire()
-        cache = []
-        for sent in doc.sentences:
-            h = hash(sent.text)
-            cached = h in sent_cache
-            if cached:
-                cpy = copy(sent_cache[h])
-                cpy.id = sent.id
-                cache.append(cpy)
-                del doc.sentences[sent.id]
-        lck.release()
-
         response = self.stub.ExtractNamedEntities(MetaMapInput(id=doc.id, sentences=doc.sentences, semantic_types=self.semantic_types))
-
-        # Cache newly run sentences
-        lck.acquire()
-        for sent in response.sentences:
-            h = hash(sent.text)
-            sent_cache[h] = sent
-        global lck
-        
-        # Insert previously cached sentences back in
-        for sent in cache:
-            response.sentences.insert(sent.id, sent)
-
         return response
 
     def to_dict(self, response):
